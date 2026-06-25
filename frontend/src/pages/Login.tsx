@@ -119,7 +119,7 @@ const Login: React.FC = () => {
 
         {/* Footer info */}
         <div className="text-xs text-slate-500 z-10 flex items-center">
-          <span>&copy; {new Date().getFullYear()} SustainHub MVP. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} NSK GROUPs. All rights reserved.</span>
         </div>
       </div>
 
