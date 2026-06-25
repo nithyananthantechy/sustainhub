@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create central Axios instance
 export const api = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api',
+  baseURL: (import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000') + '/api',
 });
 
 interface User {
@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
               console.log('[Auth] Attempting token refresh...');
               // Make call to refresh endpoint
-              const res = await axios.post((import.meta.env.VITE_API_URL || 'http://localhost:5000') + '/api/auth/refresh', {
+              const res = await axios.post((import.meta.env.VITE_API_URL?.replace(/\/$/, '') || 'http://localhost:5000') + '/api/auth/refresh', {
                 refreshToken,
               });
               
