@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import Metrics from './pages/Metrics';
 import Widget from './pages/Widget';
 import ComplianceDashboard from './pages/ComplianceDashboard';
+import DemoStore from './pages/DemoStore';
 
 // Route protection wrapper
 const ProtectedRoute = () => {
@@ -58,6 +59,9 @@ const App: React.FC = () => {
             
             {/* Embeddable Iframe Widget (No Navbar, Anonymous accessibility) */}
             <Route path="/widget" element={<Widget />} />
+            
+            {/* Demo Store for presentations */}
+            <Route path="/demo-store" element={<DemoStore />} />
 
             {/* Protected Management Dashboard Area */}
             <Route element={<ProtectedRoute />}>
