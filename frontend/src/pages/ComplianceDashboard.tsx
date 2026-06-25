@@ -326,7 +326,7 @@ export default function ComplianceDashboard() {
       {/* PDF Report Generation Trigger */}
       <div className="pt-4 shrink-0">
         <button 
-          onClick={() => alert('PDF generation is simulated for local dev mode. Standard report compile successfully.')}
+          onClick={() => window.print()}
           className="flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md transition-colors"
         >
           <FileText className="w-4 h-4 mr-2" />

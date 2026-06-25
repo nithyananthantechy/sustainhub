@@ -1,6 +1,5 @@
-import { PrismaClient, MetricCategory, TicketCategory, TicketStatus, TicketPriority } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { MetricCategory, TicketCategory, TicketStatus, TicketPriority } from '@prisma/client';
+import prisma from '../config/db';
 
 const generateDateInPastDays = (days: number) => {
   const date = new Date();
