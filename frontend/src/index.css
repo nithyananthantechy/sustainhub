@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white;
+  }
+}
+
+/* Custom Scrollbar Styles for premium desktop experience */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Glassmorphism utility card base */
+.glass-card {
+  @apply bg-white/75 backdrop-blur-md border border-white/40 shadow-glass rounded-2xl;
+}
+
+/* Micro-interaction transition utilities */
+.hover-lift {
+  @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-premium-hover;
+}
+
+/* Custom input style */
+.input-premium {
+  @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 text-sm;
+}

@@ -1,0 +1,145 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+enum CsrDataSource {
+  manual
+  api
+  sharepoint
+}
+
+enum UserRole {
+  admin
+  manager
+  user
+}
+
+enum MetricCategory {
+  environmental
+  social
+  economic
+}
+
+enum TicketCategory {
+  complaint
+  suggestion
+  issue
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  resolved
+  closed
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+  critical
+}
+
+model Company {
+  id                  String        @id @default(uuid()) @db.Uuid
+  name                String        @db.VarChar(255)
+  email               String        @unique @db.VarChar(255)
+  logoUrl             String?       @map("logo_url") @db.Text
+  csrDataSource       CsrDataSource @default(manual) @map("csr_data_source")
+  sharepointTenantId  String?       @map("sharepoint_tenant_id") @db.Text
+  sharepointListId    String?       @map("sharepoint_list_id") @db.Text
+  apiKey              String        @unique @map("api_key") @db.VarChar(255)
+  monthlyRpc          Decimal?      @map("monthly_rpc") @db.Decimal(10, 2)
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamp()
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamp()
+
+  users            User[]
+  csrMetrics       CsrMetric[]
+  operationalStats OperationalStat[]
+  tickets          Ticket[]
+
+  @@map("companies")
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  companyId    String    @map("company_id") @db.Uuid
+  name         String    @db.VarChar(255)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  role         UserRole  @default(user)
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp()
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  ticketResponses TicketResponse[]
+  tickets         Ticket[]
+
+  @@map("users")
+}
+
+model CsrMetric {
+  id          String         @id @default(uuid()) @db.Uuid
+  companyId   String         @map("company_id") @db.Uuid
+  metricName  String         @map("metric_name") @db.VarChar(255)
+  metricValue Decimal        @map("metric_value") @db.Decimal(15, 2)
+  metricUnit  String         @map("metric_unit") @db.VarChar(50)
+  category    MetricCategory
+  description String?        @db.Text
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamp()
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("csr_metrics")
+}
+
+model OperationalStat {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  statName   String   @map("stat_name") @db.VarChar(255)
+  statValue  Decimal  @map("stat_value") @db.Decimal(15, 2)
+  statUnit   String   @map("stat_unit") @db.VarChar(50)
+  timestamp  DateTime @default(now()) @db.Timestamp()
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("operational_stats")
+}
+
+model Ticket {
+  id          String         @id @default(uuid()) @db.Uuid
+  companyId   String         @map("company_id") @db.Uuid
+  userId      String?        @map("user_id") @db.Uuid
+  title       String         @db.VarChar(255)
+  description String         @db.Text
+  category    TicketCategory
+  status      TicketStatus   @default(open)
+  priority    TicketPriority @default(medium)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamp()
+  resolvedAt  DateTime?      @map("resolved_at") @db.Timestamp()
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ticketResponses TicketResponse[]
+
+  @@map("tickets")
+}
+
+model TicketResponse {
+  id           String   @id @default(uuid()) @db.Uuid
+  ticketId     String   @map("ticket_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  responseText String   @map("response_text") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_responses")
+}
