@@ -6,7 +6,7 @@ const DemoStore = () => {
   const { company } = useAuth();
   
   // We use the logged-in user's company ID if available, otherwise fallback
-  const widgetUrl = `/widget?companyId=${company?.id || '6fe5b851-b214-4a99-a0f4-651faae4ae9d'}`;
+  const widgetUrl = `/widget?company_id=${company?.id || '6fe5b851-b214-4a99-a0f4-651faae4ae9d'}`;
   
   const [isWidgetOpen, setIsWidgetOpen] = useState(false);
 
