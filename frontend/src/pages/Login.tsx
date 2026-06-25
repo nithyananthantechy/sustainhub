@@ -96,10 +96,10 @@ const Login: React.FC = () => {
         {/* Logo */}
         <div className="flex items-center space-x-3 z-10">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-xl">
-            🌱
+            🌍
           </div>
           <span className="font-outfit font-extrabold text-xl tracking-tight text-white">
-            Community WebApp
+            SustainHub
           </span>
         </div>
 
@@ -119,7 +119,7 @@ const Login: React.FC = () => {
 
         {/* Footer info */}
         <div className="text-xs text-slate-500 z-10 flex items-center">
-          <span>&copy; {new Date().getFullYear()} Community WebApp MVP. All rights reserved.</span>
+          <span>&copy; {new Date().getFullYear()} SustainHub MVP. All rights reserved.</span>
         </div>
       </div>
 
