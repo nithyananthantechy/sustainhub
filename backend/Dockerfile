@@ -1,5 +1,7 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
+
+RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /app
 
@@ -19,7 +21,9 @@ RUN npm run prisma:generate
 RUN npm run build
 
 # Production runner stage
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
+
+RUN apt-get update -y && apt-get install -y openssl
 
 WORKDIR /app
 
