@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install development dependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy Prisma schema and application source code
 COPY prisma ./prisma/
@@ -30,7 +30,7 @@ ENV PORT=5000
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 # Copy compiled resources and generated Prisma schemas
 COPY --from=builder /app/dist ./dist
