@@ -12,6 +12,10 @@ import statRoutes from './routes/statRoutes';
 import ticketRoutes from './routes/ticketRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import complianceRoutes from './routes/complianceRoutes';
+import riskRoutes from './routes/riskRoutes';
+import circularRoutes from './routes/circularRoutes';
+import economicRoutes from './routes/economicRoutes';
+import grievanceRoutes from './routes/grievanceRoutes';
 
 const app = express();
 
@@ -65,6 +69,10 @@ app.use('/api/stats', statRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/compliance', complianceRoutes);
+app.use('/api/risk', riskRoutes);
+app.use('/api/circular', circularRoutes);
+app.use('/api/economic', economicRoutes);
+app.use('/api/grievance', grievanceRoutes);
 
 // Global Error Handler Middleware
 app.use(errorHandler);

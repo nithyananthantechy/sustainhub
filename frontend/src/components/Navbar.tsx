@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { LayoutDashboard, BarChart3, Ticket, Settings, LogOut, Menu, X, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, BarChart3, Ticket, Settings, LogOut, Menu, X, ShieldAlert, Activity, Recycle, TrendingUp, Flame, Building, Briefcase, FileText } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, company, logout } = useAuth();
@@ -19,6 +19,13 @@ const Navbar: React.FC = () => {
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/metrics', label: 'CSR Metrics', icon: BarChart3 },
     { to: '/compliance', label: 'Compliance', icon: ShieldAlert },
+    { to: '/risk-engine', label: 'Risk Engine', icon: Activity },
+    { to: '/waste-heat', label: 'Waste Heat', icon: Flame },
+    { to: '/municipal', label: 'Municipal View', icon: Building },
+    { to: '/investor', label: 'Investor ESG', icon: Briefcase },
+    { to: '/reports', label: 'AI Reports', icon: FileText },
+    { to: '/circular-economy', label: 'Circular Economy', icon: Recycle },
+    { to: '/economic-impact', label: 'Economic Impact', icon: TrendingUp },
     { to: '/tickets', label: 'Tickets', icon: Ticket },
     { to: '/settings', label: 'Settings', icon: Settings },
   ];
@@ -39,8 +46,8 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo & Company info */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3 group">
+          <div className="flex items-center flex-1 min-w-0 pr-4">
+            <Link to="/" className="flex items-center space-x-3 group shrink-0">
               {company?.logoUrl ? (
                 <img src={company.logoUrl} alt="Logo" className="w-9 h-9 object-contain rounded-lg" />
               ) : (
@@ -59,13 +66,18 @@ const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop Navigation Links */}
-            <div className="hidden md:flex ml-10 space-x-1">
+            <div className="hidden md:flex ml-10 space-x-1 overflow-x-auto no-scrollbar flex-1 items-center" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              <style>{`
+                .no-scrollbar::-webkit-scrollbar {
+                  display: none;
+                }
+              `}</style>
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    `flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${
                       isActive
                         ? 'bg-slate-100 text-brand-900 shadow-sm'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'

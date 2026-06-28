@@ -30,13 +30,13 @@ const Widget: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Ticket Form state
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<'complaint' | 'suggestion' | 'issue'>('issue');
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  // Chat State
+  const [messages, setMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([
+    { role: 'assistant', content: 'Hello! I am CommunityGPT. How can I assist you today?' }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatResolved, setChatResolved] = useState(false);
 
   const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
 
@@ -66,40 +66,42 @@ const Widget: React.FC = () => {
     fetchPublicData();
   }, [companyId, apiBaseUrl]);
 
-  const handleTicketSubmit = async (e: React.FormEvent) => {
+  const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !description.trim() || !companyId) return;
+    if (!inputText.trim() || !companyId) return;
 
-    setSubmitting(true);
+    const userMessage = inputText.trim();
+    setInputText('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setChatLoading(true);
+
     try {
-      const res = await axios.post(`${apiBaseUrl}/api/tickets`, {
+      const res = await axios.post(`${apiBaseUrl}/api/grievance/chat`, {
         companyId,
-        title,
-        description,
-        category,
-        priority,
+        message: userMessage,
       });
 
-      setSubmitted(true);
-      setTitle('');
-      setDescription('');
+      setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
+      if (res.data.isResolved) {
+        setChatResolved(true);
+      }
 
       // Communicate success to parent window using postMessage
       if (window.parent) {
         window.parent.postMessage(
           {
             event: 'ticket:submitted',
-            ticketId: res.data.ticket?.id,
+            ticketId: res.data.ticketId,
             timestamp: new Date(),
           },
           '*'
         );
       }
     } catch (err: any) {
-      console.error('Error submitting public ticket:', err);
-      alert('An error occurred submitting your inquiry. Please try again.');
+      console.error('Error submitting chat:', err);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'I encountered an error connecting to the server. Please try again.' }]);
     } finally {
-      setSubmitting(false);
+      setChatLoading(false);
     }
   };
 
@@ -179,7 +181,7 @@ const Widget: React.FC = () => {
       {/* Tabs selectors */}
       <div className="flex border-b border-slate-100 text-xs font-semibold shrink-0 mb-4">
         <button
-          onClick={() => { setActiveTab('metrics'); setSubmitted(false); }}
+          onClick={() => { setActiveTab('metrics'); }}
           className={`flex-1 py-2 text-center border-b-2 transition-all ${
             activeTab === 'metrics' ? brand.tabActive : 'border-transparent text-slate-400 hover:text-slate-600'
           }`}
@@ -188,11 +190,12 @@ const Widget: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('contact')}
-          className={`flex-1 py-2 text-center border-b-2 transition-all ${
+          className={`flex-1 py-2 text-center border-b-2 transition-all flex items-center justify-center space-x-1 ${
             activeTab === 'contact' ? brand.tabActive : 'border-transparent text-slate-400 hover:text-slate-600'
           }`}
         >
-          Submit Inquiry
+          <Sparkles className="w-3 h-3" />
+          <span>CommunityGPT</span>
         </button>
       </div>
 
@@ -251,96 +254,55 @@ const Widget: React.FC = () => {
             )}
           </div>
         ) : (
-          /* Ticket submission form tab */
-          <div className="h-full">
-            {submitted ? (
-              <div className="py-8 text-center space-y-3 animate-fadeIn">
-                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
-                <h4 className="text-xs font-bold text-slate-800">Inquiry Received Successfully</h4>
-                <p className="text-[10px] text-slate-400 max-w-xs mx-auto leading-normal">
-                  Thank you! Your ticket was submitted anonymously and will be reviewed by the operations department.
-                </p>
-                <button
-                  onClick={() => setSubmitted(false)}
-                  className={`mt-4 px-4 py-2 border rounded-xl text-[10px] font-bold text-slate-500 hover:bg-slate-50 transition-colors`}
-                >
-                  Submit Another Inquiry
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleTicketSubmit} className="space-y-3 text-xs">
-                <div>
-                  <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Subject/Inquiry Title
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Short summary..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-xs"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    disabled={submitting}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                    Detailed Message
-                  </label>
-                  <textarea
-                    placeholder="Provide description of your inquiry or feedback..."
-                    rows={3}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-brand-500/10 focus:border-brand-500 text-xs resize-none"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={submitting}
-                  ></textarea>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={category}
-                      onChange={(e: any) => setCategory(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-600"
-                      disabled={submitting}
-                    >
-                      <option value="issue">Issue</option>
-                      <option value="complaint">Complaint</option>
-                      <option value="suggestion">Suggestion</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                      Urgency
-                    </label>
-                    <select
-                      value={priority}
-                      onChange={(e: any) => setPriority(e.target.value)}
-                      className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-semibold text-slate-600"
-                      disabled={submitting}
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
+          /* Chat interface tab */
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-y-auto p-2 space-y-3 bg-slate-50/50 rounded-xl mb-3 border border-slate-100">
+              {messages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] p-2.5 rounded-2xl text-[11px] leading-relaxed shadow-sm ${
+                    msg.role === 'user' 
+                      ? 'bg-slate-800 text-white rounded-tr-sm' 
+                      : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'
+                  }`}>
+                    {msg.content}
                   </div>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting || !title.trim() || !description.trim()}
-                  className={`w-full py-2.5 text-white font-bold text-xs rounded-xl shadow-sm transition-all duration-200 flex items-center justify-center space-x-1.5 disabled:opacity-50 ${brand.bg}`}
-                >
-                  <Send className="w-3 h-3" />
-                  <span>{submitting ? 'Submitting...' : 'Post Message'}</span>
-                </button>
-              </form>
-            )}
+              ))}
+              {chatLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center space-x-1">
+                    <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              )}
+              {chatResolved && (
+                <div className="flex justify-center my-2">
+                  <span className="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-3 py-1 rounded-full flex items-center">
+                    <CheckCircle2 className="w-3 h-3 mr-1" /> Issue Auto-Resolved
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            <form onSubmit={handleChatSubmit} className="shrink-0 flex items-center space-x-2">
+              <input
+                type="text"
+                placeholder="Ask about noise, air quality, etc..."
+                className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-xs"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                disabled={chatLoading}
+              />
+              <button
+                type="submit"
+                disabled={chatLoading || !inputText.trim()}
+                className={`p-2 text-white font-bold rounded-xl shadow-sm transition-all duration-200 disabled:opacity-50 ${brand.bg}`}
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
           </div>
         )}
 

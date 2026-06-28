@@ -9,17 +9,18 @@ const generateDateInPastDays = (days: number) => {
 
 async function seedDemoData() {
   const email = process.argv[2];
-  if (!email) {
-    console.error('Please provide the company email as an argument. Example: npx ts-node src/scripts/seedDemo.ts admin@nskgroups.com');
-    process.exit(1);
+  
+  let company;
+  if (email) {
+    company = await prisma.company.findUnique({
+      where: { email },
+    });
+  } else {
+    company = await prisma.company.findFirst();
   }
 
-  const company = await prisma.company.findUnique({
-    where: { email },
-  });
-
   if (!company) {
-    console.error(`Company with email ${email} not found. Please register on the UI first.`);
+    console.error(`Company not found. Please register on the UI first.`);
     process.exit(1);
   }
 
@@ -108,6 +109,60 @@ async function seedDemoData() {
       });
     }
   }
+
+  // 4. Seed Risk Assessment
+  console.log('Seeding Risk Assessment...');
+  await prisma.riskAssessment.create({
+    data: {
+      companyId,
+      riskScore: 60,
+      riskLevel: "MEDIUM",
+      topRiskFactors: JSON.stringify([
+        { issue: "Air Quality Permit Renewal Overdue", severity: "High" },
+        { issue: "Noise complaints trending up (+2 this week)", severity: "Medium" },
+        { issue: "Generator test at night - community risk", severity: "Medium" }
+      ]),
+      aiRecommendations: JSON.stringify([
+        { action: "Renew Air Quality Permit AQ-2024-IR09", priority: "Critical" },
+        { action: "Issue Community Noise Advisory Tonight", priority: "High" },
+        { action: "Install Heat Recovery Loop in Hall B", priority: "Medium" }
+      ])
+    }
+  });
+
+  // 5. Seed Circular Economy Stats
+  console.log('Seeding Circular Economy Stats...');
+  const circularStats = [
+    { cat: 'WATER', name: 'Municipal Wastewater Reused', value: 18400, unit: 'm³/yr' },
+    { cat: 'WATER', name: 'Rainwater Harvested', value: 3200, unit: 'm³/yr' },
+    { cat: 'WATER', name: 'Greywater Recovery', value: 5600, unit: 'm³/yr' },
+    { cat: 'HEAT', name: 'Waste Heat Recovered', value: 14.8, unit: 'MW' },
+    { cat: 'E-WASTE', name: 'UPS Batteries Recycled', value: 12.4, unit: 'tons' }
+  ];
+
+  for (const stat of circularStats) {
+    await prisma.circularEconomyStat.create({
+      data: {
+        companyId,
+        category: stat.cat,
+        metricName: stat.name,
+        value: stat.value,
+        unit: stat.unit
+      }
+    });
+  }
+
+  // 6. Seed Economic Impact
+  console.log('Seeding Economic Impact...');
+  await prisma.economicImpact.create({
+    data: {
+      companyId,
+      localJobs: 240,
+      localSpend: 11500000,
+      taxContribution: 3200000,
+      apprenticeships: 28
+    }
+  });
 
   console.log('✅ Demo data successfully seeded! Your dashboards should now look amazing.');
 }

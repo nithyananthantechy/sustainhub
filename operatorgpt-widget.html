@@ -1,0 +1,2299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataCenter CommunityGPT™ — Trust & Transparency Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0A0F1E;
+    --surface: #111827;
+    --card: #1A2332;
+    --card2: #1E2A3A;
+    --border: #2A3A50;
+    --teal: #00D4C8;
+    --teal-dim: rgba(0,212,200,0.12);
+    --teal-glow: rgba(0,212,200,0.3);
+    --amber: #F59E0B;
+    --amber-dim: rgba(245,158,11,0.12);
+    --red: #EF4444;
+    --red-dim: rgba(239,68,68,0.12);
+    --green: #10B981;
+    --green-dim: rgba(16,185,129,0.12);
+    --blue: #3B82F6;
+    --blue-dim: rgba(59,130,246,0.12);
+    --purple: #8B5CF6;
+    --text: #E8F0F7;
+    --text-muted: #7A8FA6;
+    --text-dim: #4A6080;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --sidebar-w: 240px;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── LAYOUT ─── */
+  .shell { display: flex; min-height: 100vh; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+  }
+
+  .sidebar-brand {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-logo {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+  }
+  .pulse-ring {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--teal);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pulse-ring::before {
+    content: '';
+    position: absolute;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--teal);
+    animation: pulse-out 2s ease-out infinite;
+  }
+  .pulse-ring::after {
+    content: '';
+    position: absolute;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 2px solid var(--teal);
+    animation: pulse-out 2s ease-out infinite 0.7s;
+  }
+  @keyframes pulse-out {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .pulse-inner {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--text);
+    position: relative; z-index: 1;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .brand-name span { color: var(--teal); }
+  .brand-tagline {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-section {
+    padding: 12px 10px 4px;
+  }
+  .sidebar-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0 8px 6px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: all 0.15s;
+    margin-bottom: 1px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--card); color: var(--text); }
+  .nav-item.active { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(0,212,200,0.2); }
+  .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--red);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
+  }
+  .nav-badge.amber { background: var(--amber); }
+  .nav-badge.teal { background: var(--teal); color: var(--bg); }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 12px 10px;
+    border-top: 1px solid var(--border);
+  }
+  .live-indicator {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    background: var(--green-dim);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .live-text { font-size: 11px; color: var(--green); font-weight: 600; }
+
+  /* ─── MAIN ─── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .topbar-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .topbar-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .facility-select {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-family: var(--font-body);
+    cursor: pointer;
+  }
+  .topbar-time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white;
+  }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; padding: 24px; animation: fadein 0.2s ease; }
+  .view.active { display: block; }
+  @keyframes fadein { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+  /* ─── SECTION HEADER ─── */
+  .section-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 20px; gap: 16px;
+  }
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 4px;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .btn {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--teal); color: var(--bg); }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-ghost { background: var(--card); color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-dim); }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ─── KPI GRID ─── */
+  .kpi-grid { display: grid; gap: 12px; }
+  .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.teal::before { background: var(--teal); }
+  .kpi-card.amber::before { background: var(--amber); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.blue::before { background: var(--blue); }
+  .kpi-card.purple::before { background: var(--purple); }
+  .kpi-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .kpi-value { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+  .kpi-unit { font-size: 12px; color: var(--text-muted); font-weight: 400; }
+  .kpi-trend {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; margin-top: 6px;
+  }
+  .kpi-trend.up { color: var(--green); }
+  .kpi-trend.down { color: var(--red); }
+  .kpi-trend.neutral { color: var(--text-muted); }
+  .kpi-trend.good-down { color: var(--green); }
+
+  /* ─── GRID LAYOUTS ─── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-6040 { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+  .grid-3070 { display: grid; grid-template-columns: 3fr 7fr; gap: 16px; }
+
+  /* ─── CHART CONTAINERS ─── */
+  .chart-wrap { position: relative; }
+  .chart-wrap canvas { max-width: 100%; }
+
+  /* ─── STATUS PILLS ─── */
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .pill.green { background: var(--green-dim); color: var(--green); }
+  .pill.amber { background: var(--amber-dim); color: var(--amber); }
+  .pill.red { background: var(--red-dim); color: var(--red); }
+  .pill.teal { background: var(--teal-dim); color: var(--teal); }
+  .pill.blue { background: var(--blue-dim); color: var(--blue); }
+  .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* ─── TABLES ─── */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(42,58,80,0.4);
+  }
+  .data-table td:first-child { color: var(--text); font-weight: 500; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ─── PROGRESS BARS ─── */
+  .progress-bar {
+    background: var(--border);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+
+  /* ─── RISK ENGINE ─── */
+  .risk-ring-wrap {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px 0;
+  }
+  .risk-ring {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .risk-score-num {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .risk-score-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .risk-level-badge {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* ─── GRIEVANCE CHAT ─── */
+  .chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 200px);
+    min-height: 500px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .chat-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ai-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    position: relative;
+  }
+  .ai-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 1px; right: 1px;
+    width: 8px; height: 8px;
+    background: var(--green);
+    border: 1.5px solid var(--card);
+    border-radius: 50%;
+  }
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .msg {
+    max-width: 80%;
+    display: flex; gap: 10px;
+  }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .msg.user .msg-avatar { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+  .msg.ai .msg-avatar { background: var(--teal-dim); color: var(--teal); border: 1px solid var(--teal); }
+  .msg-bubble {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .msg.user .msg-bubble {
+    background: var(--blue-dim);
+    border: 1px solid rgba(59,130,246,0.2);
+    color: var(--text);
+    border-radius: 12px 4px 12px 12px;
+  }
+  .msg.ai .msg-bubble {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px 12px 12px 12px;
+  }
+  .msg-time { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+  .ai-status-card {
+    margin: 6px 0;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+  }
+  .ai-status-row { display: flex; justify-content: space-between; padding: 3px 0; }
+  .ai-status-key { color: var(--text-muted); }
+  .ai-status-val { color: var(--text); font-weight: 600; font-family: var(--font-mono); }
+  .verdict-banner {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .verdict-banner.valid { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+  .verdict-banner.false-alarm { background: var(--green-dim); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .verdict-banner.investigating { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+
+  .chat-input-area {
+    padding: 14px 18px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+  .chat-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font-body);
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s;
+    min-height: 40px;
+    max-height: 100px;
+  }
+  .chat-input:focus { border-color: var(--teal); }
+  .chat-input::placeholder { color: var(--text-dim); }
+  .send-btn {
+    background: var(--teal);
+    border: none;
+    color: var(--bg);
+    width: 40px; height: 40px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .send-btn:hover { opacity: 0.85; transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .quick-pills {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 18px 0;
+  }
+  .quick-pill {
+    padding: 4px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .quick-pill:hover { border-color: var(--teal); color: var(--teal); }
+  .typing-indicator {
+    display: flex; gap: 4px; align-items: center; padding: 4px 0;
+  }
+  .typing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* ─── ACTION ITEMS ─── */
+  .action-item {
+    display: flex; gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--card2);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .action-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .action-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .action-desc { font-size: 12px; color: var(--text-muted); }
+  .action-meta { display: flex; gap: 8px; margin-top: 6px; align-items: center; }
+  .priority-tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .priority-tag.high { background: var(--red-dim); color: var(--red); }
+  .priority-tag.medium { background: var(--amber-dim); color: var(--amber); }
+  .priority-tag.low { background: var(--green-dim); color: var(--green); }
+  .priority-tag.critical { background: var(--red); color: white; }
+
+  /* ─── TABS ─── */
+  .tab-bar {
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+  .tab-btn {
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--teal); color: var(--bg); }
+  .tab-btn:hover:not(.active) { color: var(--text); background: var(--card); }
+
+  /* ─── HEAT MAP / IMPACT ─── */
+  .impact-number {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+  }
+  .impact-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ─── ECON TABLE ─── */
+  .econ-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .econ-row:last-child { border-bottom: none; }
+  .econ-cat { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+  .econ-icon { font-size: 14px; }
+  .econ-val { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); }
+
+  /* ─── GRIEVANCE LIST ─── */
+  .grievance-item {
+    padding: 12px 14px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .grievance-icon { font-size: 20px; flex-shrink: 0; }
+  .grievance-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .grievance-desc { font-size: 12px; color: var(--text-muted); }
+  .grievance-meta { display: flex; gap: 8px; margin-top: 6px; align-items: center; flex-wrap: wrap; }
+
+  /* ─── PERMIT TRACKER ─── */
+  .permit-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .permit-item:last-child { border-bottom: none; }
+  .permit-name { flex: 1; font-size: 13px; color: var(--text); font-weight: 500; }
+  .permit-exp { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+  .permit-status { font-size: 11px; font-weight: 600; }
+
+  /* ─── CIRCULAR PROGRESS ─── */
+  .circ-progress { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .circ-label { font-size: 11px; color: var(--text-muted); text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* ─── SCROLL ─── */
+  .scroll-y { overflow-y: auto; }
+  .scroll-y::-webkit-scrollbar { width: 4px; }
+  .scroll-y::-webkit-scrollbar-track { background: transparent; }
+  .scroll-y::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* ─── REPORT CARD ─── */
+  .report-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .report-item:hover { border-color: var(--teal); }
+  .report-icon { font-size: 24px; }
+  .report-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .report-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── ESG SCORE CARD ─── */
+  .esg-score-wrap {
+    display: flex; gap: 10px;
+  }
+  .esg-score-item {
+    flex: 1;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+  }
+  .esg-score-val {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--teal);
+  }
+  .esg-score-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 1100px) {
+    .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
+    .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3, .grid-6040, .grid-3070 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .kpi-grid-4, .kpi-grid-3, .kpi-grid-6 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ─── SPARKLINE ─── */
+  .sparkline-canvas { display: block; }
+
+  /* ─── NOTIFICATION DOT ─── */
+  .notif { position: relative; }
+  .notif-dot {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 7px; height: 7px;
+    background: var(--red);
+    border-radius: 50%;
+    border: 1.5px solid var(--surface);
+  }
+
+  /* ─── PUBLIC PORTAL HERO ─── */
+  .portal-hero {
+    background: linear-gradient(135deg, var(--card) 0%, rgba(0,212,200,0.06) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .portal-hero::after {
+    content: '🌿';
+    position: absolute;
+    right: 24px; bottom: 16px;
+    font-size: 60px;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+  .portal-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .portal-desc { font-size: 14px; color: var(--text-muted); max-width: 520px; }
+  .portal-updated { font-size: 11px; color: var(--text-dim); margin-top: 10px; font-family: var(--font-mono); }
+
+  .mb-16 { margin-bottom: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mt-8 { margin-top: 8px; }
+  .flex { display: flex; }
+  .flex-col { flex-direction: column; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .text-teal { color: var(--teal); }
+  .text-amber { color: var(--amber); }
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-muted { color: var(--text-muted); }
+  .font-mono { font-family: var(--font-mono); }
+  .font-display { font-family: var(--font-display); }
+  .fw-700 { font-weight: 700; }
+  .fs-12 { font-size: 12px; }
+  .fs-13 { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="pulse-ring"><div class="pulse-inner"></div></div>
+      <div>
+        <div class="brand-name">DataCenter <span>CommunityGPT™</span></div>
+      </div>
+    </div>
+    <div class="brand-tagline">Trust &amp; Transparency Platform</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Operator</div>
+    <button class="nav-item active" onclick="showView('dashboard')">
+      <span class="nav-icon">⚡</span> Command Center
+    </button>
+    <button class="nav-item" onclick="showView('compliance')">
+      <span class="nav-icon">🌍</span> Compliance &amp; ESG
+    </button>
+    <button class="nav-item" onclick="showView('risk')">
+      <span class="nav-icon">🛡</span> AI Risk Engine
+      <span class="nav-badge amber">2</span>
+    </button>
+    <button class="nav-item" onclick="showView('waste-heat')">
+      <span class="nav-icon">♻️</span> Waste Heat Recovery
+    </button>
+    <button class="nav-item" onclick="showView('circular')">
+      <span class="nav-icon">🔄</span> Circular Economy
+    </button>
+    <button class="nav-item" onclick="showView('economic')">
+      <span class="nav-icon">📊</span> Economic Impact
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Community</div>
+    <button class="nav-item" onclick="showView('grievance')">
+      <span class="nav-icon">💬</span> Grievance AI
+      <span class="nav-badge">5</span>
+    </button>
+    <button class="nav-item" onclick="showView('public')">
+      <span class="nav-icon">🌐</span> Public Portal
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Authorities &amp; Investors</div>
+    <button class="nav-item" onclick="showView('municipal')">
+      <span class="nav-icon">🏛</span> Municipal View
+    </button>
+    <button class="nav-item" onclick="showView('investor')">
+      <span class="nav-icon">📈</span> ESG &amp; Investor
+    </button>
+    <button class="nav-item" onclick="showView('reports')">
+      <span class="nav-icon">📄</span> AI Reports
+      <span class="nav-badge teal">3</span>
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="live-indicator">
+      <div class="live-dot"></div>
+      <div class="live-text">LIVE — DublinDC-01</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="view-title">Operator Command Center</div>
+      <div class="topbar-sub" id="view-sub">Real-time operations overview</div>
+    </div>
+    <div class="topbar-right">
+      <select class="facility-select">
+        <option>DublinDC-01 — Ireland</option>
+        <option>FrankfurtDC-03 — Germany</option>
+        <option>AmsterdamDC-02 — Netherlands</option>
+      </select>
+      <div class="topbar-time" id="clock">--:--:--</div>
+      <div class="avatar">OP</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: DASHBOARD ════════════════════════════════ -->
+  <div class="view active" id="view-dashboard">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Operator Command Center</div>
+        <div class="section-title">Facility Overview</div>
+        <div class="section-desc">DublinDC-01 · 48 MW · Real-time telemetry</div>
+      </div>
+      <button class="btn btn-primary">⬇ Export Report</button>
+    </div>
+
+    <!-- KPIs row 1 -->
+    <div class="kpi-grid kpi-grid-4 mb-16">
+      <div class="kpi-card teal">
+        <div class="kpi-label">PUE</div>
+        <div class="kpi-value">1.28 <span class="kpi-unit">ratio</span></div>
+        <div class="kpi-trend good-down">↓ 0.04 vs last quarter</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Renewable Energy</div>
+        <div class="kpi-value">87 <span class="kpi-unit">%</span></div>
+        <div class="kpi-trend up">↑ 9% YTD</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">WUE</div>
+        <div class="kpi-value">0.43 <span class="kpi-unit">L/kWh</span></div>
+        <div class="kpi-trend good-down">↓ 12% YTD</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">IT Load</div>
+        <div class="kpi-value">38.4 <span class="kpi-unit">MW</span></div>
+        <div class="kpi-trend neutral">→ 94% utilisation</div>
+      </div>
+    </div>
+    <!-- KPIs row 2 -->
+    <div class="kpi-grid kpi-grid-6 mb-16">
+      <div class="kpi-card green">
+        <div class="kpi-label">Scope 1</div>
+        <div class="kpi-value">210 <span class="kpi-unit">tCO₂e</span></div>
+        <div class="kpi-trend up">↓ 8% YTD</div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-label">Scope 2</div>
+        <div class="kpi-value">1,840 <span class="kpi-unit">tCO₂e</span></div>
+        <div class="kpi-trend up">↓ 22% YTD</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">Scope 3</div>
+        <div class="kpi-value">3,200 <span class="kpi-unit">tCO₂e</span></div>
+        <div class="kpi-trend neutral">→ Baseline year</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Noise (Avg)</div>
+        <div class="kpi-value">42 <span class="kpi-unit">dB</span></div>
+        <div class="kpi-trend up">✓ Under 45 dB limit</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-label">Open Grievances</div>
+        <div class="kpi-value">5</div>
+        <div class="kpi-trend down">↑ 2 new today</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Uptime SLA</div>
+        <div class="kpi-value">99.98 <span class="kpi-unit">%</span></div>
+        <div class="kpi-trend up">↑ T4 Grade</div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">🔋 Power Consumption (24h)</div>
+        <div class="chart-wrap"><canvas id="powerChart" height="200"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌱 Carbon Intensity (Monthly)</div>
+        <div class="chart-wrap"><canvas id="carbonChart" height="200"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="grid-6040">
+      <div class="card">
+        <div class="card-title">📋 Active Alerts</div>
+        <div class="action-item">
+          <div class="action-icon">⚠️</div>
+          <div>
+            <div class="action-title">Generator Test Scheduled — Hall C</div>
+            <div class="action-desc">Planned 23:00–23:45 tonight. Community notification sent.</div>
+            <div class="action-meta">
+              <span class="priority-tag medium">Medium</span>
+              <span class="pill amber"><span class="pill-dot"></span>Pending</span>
+              <span class="fs-12 text-muted">20:15 today</span>
+            </div>
+          </div>
+        </div>
+        <div class="action-item">
+          <div class="action-icon">💧</div>
+          <div>
+            <div class="action-title">Cooling Tower Blowdown Rate ↑</div>
+            <div class="action-desc">WUE increased by 0.08 over last 4 hours. Engineering notified.</div>
+            <div class="action-meta">
+              <span class="priority-tag high">High</span>
+              <span class="pill amber"><span class="pill-dot"></span>In Review</span>
+            </div>
+          </div>
+        </div>
+        <div class="action-item">
+          <div class="action-icon">🔊</div>
+          <div>
+            <div class="action-title">Noise Complaint — Beechwood Ave</div>
+            <div class="action-desc">Resident report at 22:45. AI investigation underway.</div>
+            <div class="action-meta">
+              <span class="priority-tag critical">Critical</span>
+              <span class="pill red"><span class="pill-dot"></span>Open</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌡 Real-time Sensors</div>
+        <table class="data-table">
+          <tr><th>Sensor</th><th>Value</th><th>Status</th></tr>
+          <tr><td>Intake Air Temp</td><td class="font-mono">18.4°C</td><td><span class="pill green">✓ OK</span></td></tr>
+          <tr><td>Exhaust Temp</td><td class="font-mono">28.1°C</td><td><span class="pill green">✓ OK</span></td></tr>
+          <tr><td>Ambient Noise</td><td class="font-mono">42 dB</td><td><span class="pill green">✓ OK</span></td></tr>
+          <tr><td>Water Inlet Temp</td><td class="font-mono">12.3°C</td><td><span class="pill green">✓ OK</span></td></tr>
+          <tr><td>CO₂ (onsite)</td><td class="font-mono">412 ppm</td><td><span class="pill green">✓ OK</span></td></tr>
+          <tr><td>Particulates PM2.5</td><td class="font-mono">8 µg/m³</td><td><span class="pill green">✓ OK</span></td></tr>
+          <tr><td>Grid Carbon Int.</td><td class="font-mono">67 gCO₂/kWh</td><td><span class="pill teal">Low</span></td></tr>
+          <tr><td>Thermal Discharge</td><td class="font-mono">22 MW</td><td><span class="pill amber">Monitor</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: COMPLIANCE ════════════════════════════════ -->
+  <div class="view" id="view-compliance">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Compliance &amp; Sustainability</div>
+        <div class="section-title">ESG &amp; Environmental Metrics</div>
+        <div class="section-desc">Scope 1–3 emissions, environmental performance and permit compliance</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-ghost">12 Months</button>
+        <button class="btn btn-primary">⬇ ESG Report</button>
+      </div>
+    </div>
+
+    <!-- Carbon -->
+    <div class="kpi-grid kpi-grid-3 mb-16">
+      <div class="kpi-card green">
+        <div class="kpi-label">Scope 1 — Direct</div>
+        <div class="kpi-value">210 <span class="kpi-unit">tCO₂e/yr</span></div>
+        <div class="progress-bar mt-8"><div class="progress-fill" style="width:18%;background:var(--green)"></div></div>
+        <div class="kpi-trend up mt-8">18% of Scope 1 budget · ↓ 8% vs 2023</div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-label">Scope 2 — Grid Power</div>
+        <div class="kpi-value">1,840 <span class="kpi-unit">tCO₂e/yr</span></div>
+        <div class="progress-bar mt-8"><div class="progress-fill" style="width:34%;background:var(--teal)"></div></div>
+        <div class="kpi-trend up mt-8">34% of Scope 2 budget · ↓ 22% vs 2023</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">Scope 3 — Supply Chain</div>
+        <div class="kpi-value">3,200 <span class="kpi-unit">tCO₂e/yr</span></div>
+        <div class="progress-bar mt-8"><div class="progress-fill" style="width:58%;background:var(--purple)"></div></div>
+        <div class="kpi-trend neutral mt-8">58% of Scope 3 budget · Baseline year</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">📉 Emissions Trend (3 Year)</div>
+        <div class="chart-wrap"><canvas id="emissionsChart" height="220"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🌞 Renewable Energy Mix</div>
+        <div class="chart-wrap"><canvas id="renewableChart" height="220"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Environmental KPIs -->
+    <div class="kpi-grid kpi-grid-4 mb-16">
+      <div class="kpi-card amber">
+        <div class="kpi-label">Carbon Intensity</div>
+        <div class="kpi-value">67 <span class="kpi-unit">gCO₂/kWh</span></div>
+        <div class="kpi-trend good-down">↓ Industry avg: 220 g</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Carbon Avoided</div>
+        <div class="kpi-value">12,400 <span class="kpi-unit">tCO₂e</span></div>
+        <div class="kpi-trend up">↑ via renewables &amp; heat recovery</div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-label">Waste Recovery Rate</div>
+        <div class="kpi-value">94 <span class="kpi-unit">%</span></div>
+        <div class="kpi-trend up">↑ 7% vs target</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">Water Reuse Rate</div>
+        <div class="kpi-value">62 <span class="kpi-unit">%</span></div>
+        <div class="kpi-trend up">↑ Target: 70% by 2026</div>
+      </div>
+    </div>
+
+    <!-- Permit table -->
+    <div class="card">
+      <div class="card-title">📋 Permit Compliance Status</div>
+      <div class="permit-item"><span class="permit-name">Noise Emissions Permit NP-2024-07</span><span class="permit-exp">Expires: Dec 2026</span><span class="permit-status text-green">✓ Compliant</span></div>
+      <div class="permit-item"><span class="permit-name">Air Quality — LAQM Ref AQ-2024-IR09</span><span class="permit-exp">Expires: Jun 2025</span><span class="permit-status text-amber">⚠ Renewal Due</span></div>
+      <div class="permit-item"><span class="permit-name">Water Abstraction Licence WA-2022-04</span><span class="permit-exp">Expires: Mar 2027</span><span class="permit-status text-green">✓ Compliant</span></div>
+      <div class="permit-item"><span class="permit-name">Generator Testing Permit GEN-2024-11</span><span class="permit-exp">Expires: Jan 2026</span><span class="permit-status text-green">✓ Compliant</span></div>
+      <div class="permit-item"><span class="permit-name">IDA Planning Condition PC-2021-03</span><span class="permit-exp">Ongoing</span><span class="permit-status text-green">✓ Compliant</span></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: RISK ENGINE ════════════════════════════════ -->
+  <div class="view" id="view-risk">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">AI Risk Engine</div>
+        <div class="section-title">Predictive Compliance &amp; Community Risk</div>
+        <div class="section-desc">Machine-learning model trained on regulatory, ESG, and community data</div>
+      </div>
+      <button class="btn btn-primary">🔄 Refresh Model</button>
+    </div>
+
+    <div class="grid-6040 mb-16">
+      <div class="card">
+        <div class="card-title">🎯 Current Risk Assessment</div>
+        <div class="risk-ring-wrap">
+          <div class="risk-ring" style="background: conic-gradient(var(--amber) 0deg 216deg, var(--border) 216deg); box-shadow: 0 0 40px rgba(245,158,11,0.2);">
+            <div style="width:108px;height:108px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+              <div class="risk-score-num" style="color:var(--amber)">60</div>
+              <div class="risk-score-label">/ 100</div>
+            </div>
+          </div>
+          <div class="risk-level-badge" style="background:var(--amber-dim);color:var(--amber)">⚠ MEDIUM RISK</div>
+          <div style="font-size:11px;color:var(--text-dim);margin-top:8px;font-family:var(--font-mono)">Updated 2 min ago</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔮 Risk Predictions (30-day horizon)</div>
+        <div class="chart-wrap"><canvas id="riskChart" height="240"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Risk breakdown -->
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">⚡ Top Risk Factors</div>
+        <div style="padding: 4px 0">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span class="fs-13">Air Quality Permit Renewal Overdue</span>
+            <span class="pill red"><span class="pill-dot"></span>High</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span class="fs-13">Noise complaints trending up (+2 this week)</span>
+            <span class="pill amber"><span class="pill-dot"></span>Medium</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span class="fs-13">Scope 3 disclosure incomplete (supply chain)</span>
+            <span class="pill amber"><span class="pill-dot"></span>Medium</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span class="fs-13">Generator test at night — community risk</span>
+            <span class="pill amber"><span class="pill-dot"></span>Medium</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+            <span class="fs-13">Water usage above Q3 forecast</span>
+            <span class="pill teal"><span class="pill-dot"></span>Low</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🤖 AI Recommended Actions</div>
+        <div class="action-item">
+          <div class="action-icon">📋</div>
+          <div>
+            <div class="action-title">Renew Air Quality Permit AQ-2024-IR09</div>
+            <div class="action-desc">Submit renewal application immediately. Expiry creates permit violation exposure. Est. processing: 6–8 weeks.</div>
+            <div class="action-meta"><span class="priority-tag critical">P1 · Critical</span></div>
+          </div>
+        </div>
+        <div class="action-item">
+          <div class="action-icon">🔊</div>
+          <div>
+            <div class="action-title">Issue Community Noise Advisory Tonight</div>
+            <div class="action-desc">Generator test at 23:00 warrants a proactive community SMS/email. Avoids complaint escalation by 74%.</div>
+            <div class="action-meta"><span class="priority-tag high">P2 · High</span></div>
+          </div>
+        </div>
+        <div class="action-item">
+          <div class="action-icon">♻️</div>
+          <div>
+            <div class="action-title">Install Heat Recovery Loop — Hall B</div>
+            <div class="action-desc">Expected reduction: 650 tCO₂/yr. Saving: €120,000/yr. ESG score +12 pts. Community benefit: 420 homes heated.</div>
+            <div class="action-meta"><span class="priority-tag medium">P3 · Medium</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: GRIEVANCE AI ════════════════════════════════ -->
+  <div class="view" id="view-grievance">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Community Grievance AI</div>
+        <div class="section-title">AI-Powered Complaint Resolution</div>
+        <div class="section-desc">Automated root cause analysis · real-time telemetry integration · verified responses</div>
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-ghost">📋 View All (5)</button>
+        <button class="btn btn-primary">+ New Report</button>
+      </div>
+    </div>
+
+    <div class="grid-6040">
+      <!-- CHAT -->
+      <div>
+        <div style="margin-bottom:12px">
+          <div class="fs-13 text-muted" style="margin-bottom:8px">Report an issue or ask a question about the DublinDC-01 facility:</div>
+        </div>
+        <div class="chat-container">
+          <div class="chat-header">
+            <div class="ai-avatar">🤖</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">CommunityGPT Assistant</div>
+              <div style="font-size:11px;color:var(--green)">● Online · Telemetry connected</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <span class="pill teal"><span class="pill-dot"></span>Verified</span>
+            </div>
+          </div>
+          <div class="quick-pills">
+            <div class="quick-pill" onclick="fillChat('I heard loud generator noise at 22:45 last night')">🔊 Noise complaint</div>
+            <div class="quick-pill" onclick="fillChat('There is heavy traffic from construction lorries every morning')">🚛 Traffic issue</div>
+            <div class="quick-pill" onclick="fillChat('Is the water from the facility affecting our local supply?')">💧 Water concern</div>
+            <div class="quick-pill" onclick="fillChat('I can see a lot of steam coming from the cooling towers')">🌫 Air/steam concern</div>
+            <div class="quick-pill" onclick="fillChat('What are the facility opening hours for deliveries?')">📦 General info</div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div class="msg ai">
+              <div class="msg-avatar">🤖</div>
+              <div>
+                <div class="msg-bubble">
+                  Hello, I'm the CommunityGPT assistant for <strong>DublinDC-01</strong>. I'm connected to live telemetry, generator logs, weather stations, and noise sensors across the facility.<br><br>
+                  I can help you report concerns, verify complaints, and explain what's happening at the facility in plain language. How can I help you today?
+                </div>
+                <div class="msg-time">Today, 09:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <textarea class="chat-input" id="chatInput" rows="1" placeholder="Describe your concern or ask a question…" onkeydown="handleChatKey(event)"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendGrievance()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRIEVANCE LIST -->
+      <div>
+        <div class="card-title mb-8">📂 Recent Grievances</div>
+        <div class="grievance-item">
+          <div class="grievance-icon">🔊</div>
+          <div style="flex:1">
+            <div class="grievance-title">Noise — Beechwood Ave resident</div>
+            <div class="grievance-desc">"Generator noise at 22:45 on Sunday"</div>
+            <div class="grievance-meta">
+              <span class="pill red"><span class="pill-dot"></span>Valid · Open</span>
+              <span class="fs-12 font-mono text-muted">Sun 22:45</span>
+            </div>
+          </div>
+        </div>
+        <div class="grievance-item">
+          <div class="grievance-icon">🚛</div>
+          <div style="flex:1">
+            <div class="grievance-title">Traffic — Malahide Rd morning congestion</div>
+            <div class="grievance-desc">"Construction lorries blocking road 07:00–09:00"</div>
+            <div class="grievance-meta">
+              <span class="pill amber"><span class="pill-dot"></span>Investigating</span>
+              <span class="fs-12 font-mono text-muted">Mon 08:15</span>
+            </div>
+          </div>
+        </div>
+        <div class="grievance-item">
+          <div class="grievance-icon">🌫</div>
+          <div style="flex:1">
+            <div class="grievance-title">Steam / Air — Cooling tower plume</div>
+            <div class="grievance-desc">"Large cloud of steam, worried about air quality"</div>
+            <div class="grievance-meta">
+              <span class="pill green"><span class="pill-dot"></span>Resolved · False alarm</span>
+              <span class="fs-12 font-mono text-muted">Sat 14:20</span>
+            </div>
+          </div>
+        </div>
+        <div class="grievance-item">
+          <div class="grievance-icon">💧</div>
+          <div style="flex:1">
+            <div class="grievance-title">Water — Odour near facility perimeter</div>
+            <div class="grievance-desc">"Chemical smell near the western fence"</div>
+            <div class="grievance-meta">
+              <span class="pill amber"><span class="pill-dot"></span>Investigating</span>
+              <span class="fs-12 font-mono text-muted">Fri 16:40</span>
+            </div>
+          </div>
+        </div>
+        <div class="grievance-item">
+          <div class="grievance-icon">🏗</div>
+          <div style="flex:1">
+            <div class="grievance-title">Construction — Vibration damage concern</div>
+            <div class="grievance-desc">"Cracks in garden wall, pile driving vibration"</div>
+            <div class="grievance-meta">
+              <span class="pill red"><span class="pill-dot"></span>Valid · Escalated</span>
+              <span class="fs-12 font-mono text-muted">Thu 10:05</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16">
+          <div class="card-title mb-8">📊 Resolution Stats</div>
+          <div class="card">
+            <div class="grid-2 gap-8">
+              <div style="text-align:center;padding:10px 0">
+                <div class="impact-number text-green">74%</div>
+                <div class="impact-label">Auto-resolved by AI</div>
+              </div>
+              <div style="text-align:center;padding:10px 0">
+                <div class="impact-number text-teal">4.2h</div>
+                <div class="impact-label">Avg resolution time</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted)">
+              <span>Valid complaints: <strong class="text-red" style="color:var(--red)">38%</strong></span>
+              <span>False alarms: <strong class="text-green" style="color:var(--green)">40%</strong></span>
+              <span>External: <strong class="text-amber" style="color:var(--amber)">22%</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: WASTE HEAT ════════════════════════════════ -->
+  <div class="view" id="view-waste-heat">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Waste Heat Recovery</div>
+        <div class="section-title">Community Heat Contribution</div>
+        <div class="section-desc">Converting data centre thermal output into community energy — district heating, schools, hospitals</div>
+      </div>
+      <button class="btn btn-primary">📤 Share Data</button>
+    </div>
+
+    <div class="kpi-grid kpi-grid-4 mb-16">
+      <div class="kpi-card teal">
+        <div class="kpi-label">Waste Heat Generated</div>
+        <div class="kpi-value">22 <span class="kpi-unit">MW thermal</span></div>
+        <div class="kpi-trend neutral">→ Continuous output</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Heat Recovered &amp; Reused</div>
+        <div class="kpi-value">14.8 <span class="kpi-unit">MW</span></div>
+        <div class="kpi-trend up">67% recovery rate ↑</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">CO₂ Avoided (Annual)</div>
+        <div class="kpi-value">3,800 <span class="kpi-unit">tCO₂e</span></div>
+        <div class="kpi-trend up">↑ 14% vs last year</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">Natural Gas Avoided</div>
+        <div class="kpi-value">1.9M <span class="kpi-unit">m³/yr</span></div>
+        <div class="kpi-trend up">↑ Community benefit</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">🌡 Monthly Heat Output vs. Recovery</div>
+        <div class="chart-wrap"><canvas id="heatChart" height="220"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏘 Community Beneficiaries</div>
+        <table class="data-table">
+          <tr><th>Recipient</th><th>Heat (MWh/yr)</th><th>Impact</th></tr>
+          <tr><td>🏠 Residential District</td><td class="font-mono">48,200</td><td><span class="pill green">4,250 homes</span></td></tr>
+          <tr><td>🏊 Public Swimming Pool</td><td class="font-mono">3,100</td><td><span class="pill teal">Year-round ops</span></td></tr>
+          <tr><td>🏫 2× Primary Schools</td><td class="font-mono">1,800</td><td><span class="pill blue">Fully heated</span></td></tr>
+          <tr><td>🏥 Community Hospital</td><td class="font-mono">8,400</td><td><span class="pill amber">€480K savings</span></td></tr>
+          <tr><td>🌿 Greenhouses (3×)</td><td class="font-mono">2,600</td><td><span class="pill green">Year-round grow</span></td></tr>
+          <tr><td>🏢 Affordable Housing</td><td class="font-mono">6,200</td><td><span class="pill teal">320 units</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Community impact numbers -->
+    <div class="card">
+      <div class="card-title">💚 Community Benefit Summary</div>
+      <div class="kpi-grid kpi-grid-4">
+        <div style="text-align:center;padding:16px 0">
+          <div class="impact-number text-teal">4,250</div>
+          <div class="impact-label">Homes heated</div>
+        </div>
+        <div style="text-align:center;padding:16px 0">
+          <div class="impact-number text-green">3,800</div>
+          <div class="impact-label">Tonnes CO₂ avoided</div>
+        </div>
+        <div style="text-align:center;padding:16px 0">
+          <div class="impact-number text-amber">€1.2M</div>
+          <div class="impact-label">Community savings/yr</div>
+        </div>
+        <div style="text-align:center;padding:16px 0">
+          <div class="impact-number text-blue">1.9M</div>
+          <div class="impact-label">m³ gas avoided</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: CIRCULAR ECONOMY ════════════════════════════════ -->
+  <div class="view" id="view-circular">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Circular Economy</div>
+        <div class="section-title">Water, Materials &amp; Resource Recovery</div>
+        <div class="section-desc">Closing the loop on water, e-waste, batteries, and server hardware</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">💧 Water Recovery Dashboard</div>
+        <div class="kpi-grid kpi-grid-2 mb-16">
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div class="kpi-label">Municipal Wastewater Reused</div>
+            <div class="kpi-value" style="font-size:20px">18,400 <span class="kpi-unit">m³/yr</span></div>
+          </div>
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div class="kpi-label">Rainwater Harvested</div>
+            <div class="kpi-value" style="font-size:20px">3,200 <span class="kpi-unit">m³/yr</span></div>
+          </div>
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div class="kpi-label">Greywater Recovery</div>
+            <div class="kpi-value" style="font-size:20px">5,600 <span class="kpi-unit">m³/yr</span></div>
+          </div>
+          <div style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px">
+            <div class="kpi-label">Potable Water Saved</div>
+            <div class="kpi-value" style="font-size:20px">27,200 <span class="kpi-unit">m³/yr</span></div>
+          </div>
+        </div>
+        <div class="chart-wrap"><canvas id="waterChart" height="160"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🔋 Materials Recovery</div>
+        <div class="chart-wrap" style="height:180px;display:flex;align-items:center;justify-content:center">
+          <canvas id="materialsChart" height="180"></canvas>
+        </div>
+        <div class="divider"></div>
+        <table class="data-table">
+          <tr><th>Material</th><th>Volume</th><th>Disposition</th></tr>
+          <tr><td>🔋 Batteries (UPS)</td><td>12.4 t</td><td><span class="pill green">100% Recycled</span></td></tr>
+          <tr><td>⚡ UPS Components</td><td>8.1 t</td><td><span class="pill teal">68% Reused</span></td></tr>
+          <tr><td>🖥 Servers Refurbished</td><td>420 units</td><td><span class="pill blue">Resold</span></td></tr>
+          <tr><td>📦 E-waste Diverted</td><td>3.8 t</td><td><span class="pill green">0% Landfill</span></td></tr>
+          <tr><td>🧊 Cooling Refrigerant</td><td>0.4 t</td><td><span class="pill amber">Recovered</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: ECONOMIC IMPACT ════════════════════════════════ -->
+  <div class="view" id="view-economic">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Economic Impact</div>
+        <div class="section-title">Local Economic Contribution</div>
+        <div class="section-desc">Employment, local spend, apprenticeships and supply chain impact</div>
+      </div>
+      <button class="btn btn-primary">📄 Export for Council</button>
+    </div>
+
+    <div class="kpi-grid kpi-grid-4 mb-16">
+      <div class="kpi-card teal">
+        <div class="kpi-label">Total Local Jobs</div>
+        <div class="kpi-value">240 <span class="kpi-unit">FTE</span></div>
+        <div class="kpi-trend up">↑ Direct + Indirect</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">Local Supplier Spend</div>
+        <div class="kpi-value">€11.5M <span class="kpi-unit">/yr</span></div>
+        <div class="kpi-trend up">↑ 18% vs 2023</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Tax Contribution</div>
+        <div class="kpi-value">€3.2M <span class="kpi-unit">/yr</span></div>
+        <div class="kpi-trend up">↑ Rates + Levies</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">Apprenticeships</div>
+        <div class="kpi-value">28 <span class="kpi-unit">active</span></div>
+        <div class="kpi-trend up">+ 6 graduate programs</div>
+      </div>
+    </div>
+
+    <div class="grid-6040 mb-16">
+      <div class="card">
+        <div class="card-title">💼 Annual Local Economic Contribution</div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">👷</span> Construction Jobs (direct + indirect)</span>
+          <span class="econ-val">480 person-years</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🔧</span> Operations Engineers</span>
+          <span class="econ-val">82 FTE</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🔒</span> Security &amp; Facility Mgmt</span>
+          <span class="econ-val">54 FTE</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🏨</span> Hotel Spend (contractors)</span>
+          <span class="econ-val">€1.8M/yr</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🍽</span> Restaurant &amp; Catering</span>
+          <span class="econ-val">€620K/yr</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🚌</span> Transport Providers</span>
+          <span class="econ-val">€340K/yr</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🏭</span> Local Equipment Suppliers</span>
+          <span class="econ-val">€11.5M/yr</span>
+        </div>
+        <div class="econ-row">
+          <span class="econ-cat"><span class="econ-icon">🎓</span> Students Trained / Interns</span>
+          <span class="econ-val">46/yr</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Local Spend Breakdown</div>
+        <div class="chart-wrap" style="display:flex;align-items:center;justify-content:center">
+          <canvas id="econChart" height="280"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Employment Growth Over Time</div>
+      <div class="chart-wrap"><canvas id="employmentChart" height="160"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: PUBLIC PORTAL ════════════════════════════════ -->
+  <div class="view" id="view-public">
+    <div class="portal-hero">
+      <div class="portal-title">DublinDC-01 Sustainability Scorecard</div>
+      <div class="portal-desc">Real-time environmental, social, and economic data for our community neighbours. We believe transparency builds trust.</div>
+      <div class="portal-updated">📡 Live data · Last updated: <span id="portalTime">--</span></div>
+    </div>
+
+    <div class="kpi-grid kpi-grid-4 mb-16">
+      <div class="kpi-card green">
+        <div class="kpi-label">🌱 Renewable Energy</div>
+        <div class="kpi-value">87 <span class="kpi-unit">%</span></div>
+        <div style="margin-top:6px"><div class="progress-bar"><div class="progress-fill" style="width:87%;background:var(--green)"></div></div></div>
+        <div class="kpi-trend up mt-8">Target: 95% by 2027</div>
+      </div>
+      <div class="kpi-card teal">
+        <div class="kpi-label">🔊 Noise (boundary)</div>
+        <div class="kpi-value">42 <span class="kpi-unit">dB</span></div>
+        <div style="margin-top:6px"><div class="progress-bar"><div class="progress-fill" style="width:84%;background:var(--teal)"></div></div></div>
+        <div class="kpi-trend up mt-8">Limit: 45 dB · ✓ Compliant</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">💧 Water Use</div>
+        <div class="kpi-value">0.43 <span class="kpi-unit">L/kWh</span></div>
+        <div style="margin-top:6px"><div class="progress-bar"><div class="progress-fill" style="width:57%;background:var(--amber)"></div></div></div>
+        <div class="kpi-trend good-down mt-8">↓ 12% vs 2023</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">♻️ Waste Heat Supplied</div>
+        <div class="kpi-value">14.8 <span class="kpi-unit">MW</span></div>
+        <div style="margin-top:6px"><div class="progress-bar"><div class="progress-fill" style="width:67%;background:var(--green)"></div></div></div>
+        <div class="kpi-trend up mt-8">4,250 homes benefiting</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">📊 12-Month Emissions Track</div>
+        <div class="chart-wrap"><canvas id="publicEmissionsChart" height="220"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💚 Community Investments 2024</div>
+        <table class="data-table">
+          <tr><th>Initiative</th><th>Value</th><th>Impact</th></tr>
+          <tr><td>🏘 District Heating Network</td><td>€2.4M</td><td>4,250 homes</td></tr>
+          <tr><td>🎓 STEM School Programme</td><td>€85K</td><td>640 students</td></tr>
+          <tr><td>🌳 Urban Tree Planting</td><td>€42K</td><td>1,200 trees</td></tr>
+          <tr><td>🏊 Pool Heat Donation</td><td>€60K</td><td>Free public swim</td></tr>
+          <tr><td>📡 Community Wi-Fi</td><td>€28K</td><td>3 public hubs</td></tr>
+          <tr><td>🎪 Local Events Sponsorship</td><td>€35K</td><td>8 events</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="kpi-grid kpi-grid-3">
+      <div class="kpi-card teal">
+        <div class="kpi-label">🧑‍💼 Local Jobs Created</div>
+        <div class="kpi-value">240 <span class="kpi-unit">FTE</span></div>
+        <div class="kpi-trend up">↑ 28 new this year</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">🌿 Total CO₂ Avoided</div>
+        <div class="kpi-value">12,400 <span class="kpi-unit">tCO₂e</span></div>
+        <div class="kpi-trend up">↑ vs fossil baseline</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">🏘 Community Investment</div>
+        <div class="kpi-value">€2.7M <span class="kpi-unit">/yr</span></div>
+        <div class="kpi-trend up">↑ 31% vs 2023</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: MUNICIPAL ════════════════════════════════ -->
+  <div class="view" id="view-municipal">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">Municipal Authority View</div>
+        <div class="section-title">Planning &amp; Regulatory Dashboard</div>
+        <div class="section-desc">For city councils, planning authorities and environmental agencies</div>
+      </div>
+      <button class="btn btn-primary">📋 Regulatory Pack</button>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">📋 Permit Status Summary</div>
+        <div class="permit-item"><span class="permit-name">Noise Emissions NP-2024-07</span><span class="permit-exp">Dec 2026</span><span class="permit-status text-green">✓ Compliant</span></div>
+        <div class="permit-item"><span class="permit-name">Air Quality AQ-2024-IR09</span><span class="permit-exp">Jun 2025</span><span class="permit-status text-amber">⚠ Renewal pending</span></div>
+        <div class="permit-item"><span class="permit-name">Water Abstraction WA-2022-04</span><span class="permit-exp">Mar 2027</span><span class="permit-status text-green">✓ Compliant</span></div>
+        <div class="permit-item"><span class="permit-name">Generator Testing GEN-2024-11</span><span class="permit-exp">Jan 2026</span><span class="permit-status text-green">✓ Compliant</span></div>
+        <div class="permit-item"><span class="permit-name">IDA Planning Condition PC-2021-03</span><span class="permit-exp">Ongoing</span><span class="permit-status text-green">✓ Compliant</span></div>
+        <div class="permit-item"><span class="permit-name">Thermal Discharge TD-2023-08</span><span class="permit-exp">Aug 2025</span><span class="permit-status text-amber">⚠ Review Q3</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏛 Community Impact Summary</div>
+        <div class="econ-row"><span class="econ-cat"><span class="econ-icon">👷</span> Jobs Created (direct)</span><span class="econ-val">136 FTE</span></div>
+        <div class="econ-row"><span class="econ-cat"><span class="econ-icon">🔗</span> Jobs (indirect/supply chain)</span><span class="econ-val">104 FTE</span></div>
+        <div class="econ-row"><span class="econ-cat"><span class="econ-icon">💶</span> Annual Tax Contribution</span><span class="econ-val">€3.2M</span></div>
+        <div class="econ-row"><span class="econ-cat"><span class="econ-icon">🏭</span> Economic Output</span><span class="econ-val">€48M/yr</span></div>
+        <div class="econ-row"><span class="econ-cat"><span class="econ-icon">🌡</span> Heat Energy Exported</span><span class="econ-val">70,300 MWh/yr</span></div>
+        <div class="econ-row"><span class="econ-cat"><span class="econ-icon">🌱</span> Net Carbon Position</span><span class="econ-val">−8,600 tCO₂e</span></div>
+      </div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="card-title">🔔 Generator Testing Schedule (90 days)</div>
+      <table class="data-table">
+        <tr><th>Date</th><th>Hall</th><th>Time</th><th>Duration</th><th>Community Notice</th><th>Status</th></tr>
+        <tr><td>15 Jan 2025</td><td>Hall C</td><td>23:00</td><td>45 min</td><td><span class="pill green">Sent</span></td><td><span class="pill amber">Tonight</span></td></tr>
+        <tr><td>12 Feb 2025</td><td>Hall A</td><td>22:30</td><td>60 min</td><td><span class="pill teal">Scheduled</span></td><td><span class="pill teal">Upcoming</span></td></tr>
+        <tr><td>8 Mar 2025</td><td>Hall B</td><td>23:15</td><td>45 min</td><td><span class="pill teal">Scheduled</span></td><td><span class="pill teal">Upcoming</span></td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Quarterly Compliance Trend</div>
+      <div class="chart-wrap"><canvas id="municipalChart" height="180"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: INVESTOR ════════════════════════════════ -->
+  <div class="view" id="view-investor">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">ESG &amp; Investor Dashboard</div>
+        <div class="section-title">Sustainability &amp; Governance Rating</div>
+        <div class="section-desc">For institutional investors, lenders, and ESG analysts</div>
+      </div>
+      <button class="btn btn-primary">📊 Investor Pack</button>
+    </div>
+
+    <!-- ESG Scores -->
+    <div class="esg-score-wrap mb-16">
+      <div class="esg-score-item">
+        <div class="esg-score-val">A–</div>
+        <div class="esg-score-label">Overall ESG</div>
+      </div>
+      <div class="esg-score-item">
+        <div class="esg-score-val" style="color:var(--green)">A</div>
+        <div class="esg-score-label">Environmental</div>
+      </div>
+      <div class="esg-score-item">
+        <div class="esg-score-val" style="color:var(--blue)">B+</div>
+        <div class="esg-score-label">Social</div>
+      </div>
+      <div class="esg-score-item">
+        <div class="esg-score-val" style="color:var(--purple)">A–</div>
+        <div class="esg-score-label">Governance</div>
+      </div>
+      <div class="esg-score-item">
+        <div class="esg-score-val" style="color:var(--amber)">78</div>
+        <div class="esg-score-label">Sustainability Score</div>
+      </div>
+      <div class="esg-score-item">
+        <div class="esg-score-val" style="color:var(--teal)">92</div>
+        <div class="esg-score-label">Compliance Score</div>
+      </div>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div class="card">
+        <div class="card-title">🌿 Environmental Metrics</div>
+        <div class="chart-wrap"><canvas id="investorEnvChart" height="220"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🤝 Social &amp; Governance KPIs</div>
+        <table class="data-table">
+          <tr><th>KPI</th><th>Value</th><th>Rating</th></tr>
+          <tr><td>Local Jobs Created</td><td>240 FTE</td><td><span class="pill green">A</span></td></tr>
+          <tr><td>Gender Diversity</td><td>38%</td><td><span class="pill teal">B+</span></td></tr>
+          <tr><td>Community Investment</td><td>€2.7M/yr</td><td><span class="pill green">A</span></td></tr>
+          <tr><td>Open Grievances</td><td>5</td><td><span class="pill amber">B</span></td></tr>
+          <tr><td>Grievance Resolution Rate</td><td>94%</td><td><span class="pill green">A</span></td></tr>
+          <tr><td>Avg Resolution Time</td><td>4.2 hours</td><td><span class="pill green">A</span></td></tr>
+          <tr><td>Regulatory Violations</td><td>0 (12 mo)</td><td><span class="pill green">A+</span></td></tr>
+          <tr><td>Permit Compliance</td><td>92%</td><td><span class="pill teal">A–</span></td></tr>
+          <tr><td>ESG Disclosure Score</td><td>88/100</td><td><span class="pill green">A</span></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 ESG Score Trajectory (3-year)</div>
+      <div class="chart-wrap"><canvas id="esgTrendChart" height="160"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ VIEW: REPORTS ════════════════════════════════ -->
+  <div class="view" id="view-reports">
+    <div class="section-header">
+      <div>
+        <div class="section-eyebrow">AI-Generated Reports</div>
+        <div class="section-title">Automated Reporting Suite</div>
+        <div class="section-desc">AI-compiled ESG, regulatory, investor and town hall documents</div>
+      </div>
+      <button class="btn btn-primary" id="generateReportBtn" onclick="generateReport()">🤖 Generate New Report</button>
+    </div>
+
+    <div id="reportOutputArea" style="display:none;margin-bottom:16px" class="card">
+      <div class="card-title">🤖 AI Report Generator</div>
+      <div id="reportOutput" style="font-size:13px;color:var(--text-muted);line-height:1.7"></div>
+    </div>
+
+    <div class="grid-2 mb-16">
+      <div>
+        <div class="card-title mb-8">📋 Ready to Download</div>
+        <div class="report-item">
+          <div class="report-icon">📊</div>
+          <div>
+            <div class="report-title">Monthly ESG Report — December 2024</div>
+            <div class="report-meta">AI-compiled · 28 pages · Generated 1 Jan 2025</div>
+          </div>
+          <button class="btn btn-ghost" style="margin-left:auto">⬇</button>
+        </div>
+        <div class="report-item">
+          <div class="report-icon">🌿</div>
+          <div>
+            <div class="report-title">Annual Sustainability Report 2024</div>
+            <div class="report-meta">AI-compiled · 64 pages · With community data</div>
+          </div>
+          <button class="btn btn-ghost" style="margin-left:auto">⬇</button>
+        </div>
+        <div class="report-item">
+          <div class="report-icon">🏛</div>
+          <div>
+            <div class="report-title">Town Hall Presentation Pack — Q1 2025</div>
+            <div class="report-meta">AI-compiled · 18 slides · Community edition</div>
+          </div>
+          <button class="btn btn-ghost" style="margin-left:auto">⬇</button>
+        </div>
+        <div class="report-item">
+          <div class="report-icon">📋</div>
+          <div>
+            <div class="report-title">Regulatory Submission — EPA Q4 2024</div>
+            <div class="report-meta">AI-compiled · Permit data included</div>
+          </div>
+          <button class="btn btn-ghost" style="margin-left:auto">⬇</button>
+        </div>
+        <div class="report-item">
+          <div class="report-icon">📈</div>
+          <div>
+            <div class="report-title">Investor ESG Data Pack — FY2024</div>
+            <div class="report-meta">AI-compiled · TCFD-aligned · 42 pages</div>
+          </div>
+          <button class="btn btn-ghost" style="margin-left:auto">⬇</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="card-title mb-8">⚙ Report Configuration</div>
+        <div class="card">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div class="fs-12 text-muted" style="margin-bottom:4px">Report Type</div>
+              <select class="facility-select" style="width:100%" id="reportType">
+                <option>Monthly ESG Report</option>
+                <option>Annual Sustainability Report</option>
+                <option>Town Hall Presentation Pack</option>
+                <option>Regulatory Submission</option>
+                <option>Investor ESG Data Pack</option>
+                <option>Community Benefit Summary</option>
+              </select>
+            </div>
+            <div>
+              <div class="fs-12 text-muted" style="margin-bottom:4px">Period</div>
+              <select class="facility-select" style="width:100%" id="reportPeriod">
+                <option>January 2025</option>
+                <option>Q4 2024</option>
+                <option>Full Year 2024</option>
+                <option>Last 90 days</option>
+              </select>
+            </div>
+            <div>
+              <div class="fs-12 text-muted" style="margin-bottom:4px">Include Sections</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <span class="pill teal" style="cursor:pointer">Carbon data</span>
+                <span class="pill teal" style="cursor:pointer">Water</span>
+                <span class="pill teal" style="cursor:pointer">Community</span>
+                <span class="pill teal" style="cursor:pointer">Employment</span>
+                <span class="pill blue" style="cursor:pointer">Permits</span>
+                <span class="pill blue" style="cursor:pointer">Grievances</span>
+                <span class="pill green" style="cursor:pointer">Heat recovery</span>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="generateReport()" style="width:100%">🤖 Generate with AI</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+</div><!-- end shell -->
+
+<script>
+// ═══════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const pt = document.getElementById('portalTime');
+  if(pt) pt.textContent = now.toLocaleTimeString('en-IE', {hour:'2-digit',minute:'2-digit'}) + ' · ' + now.toLocaleDateString('en-IE');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const viewMeta = {
+  dashboard:  ['Operator Command Center','Real-time operations overview'],
+  compliance: ['Compliance & ESG','Scope 1–3 emissions and permit status'],
+  risk:       ['AI Risk Engine','Predictive compliance and community risk'],
+  'waste-heat':['Waste Heat Recovery','Community heat contribution tracker'],
+  circular:   ['Circular Economy','Water, materials and resource recovery'],
+  economic:   ['Economic Impact','Local employment and spending'],
+  grievance:  ['Community Grievance AI','AI-powered complaint resolution'],
+  public:     ['Public Transparency Portal','Community-facing sustainability scorecard'],
+  municipal:  ['Municipal Authority View','Planning and regulatory dashboard'],
+  investor:   ['ESG & Investor Dashboard','Sustainability and governance rating'],
+  reports:    ['AI-Generated Reports','Automated reporting suite'],
+};
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+  });
+  const meta = viewMeta[id] || ['Platform','DataCenter CommunityGPT™'];
+  document.getElementById('view-title').textContent = meta[0];
+  document.getElementById('view-sub').textContent = meta[1];
+  // Lazy init charts
+  setTimeout(() => initChartsForView(id), 50);
+}
+
+// ═══════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════
+const TEAL = '#00D4C8', AMBER = '#F59E0B', GREEN = '#10B981', RED = '#EF4444',
+      BLUE = '#3B82F6', PURPLE = '#8B5CF6', BORDER = '#2A3A50',
+      TEXT_MUTED = '#7A8FA6';
+const chartDefaults = {
+  plugins: { legend: { labels: { color: TEXT_MUTED, font: {size:11,family:'Inter'}, boxWidth:10 } } },
+  scales: {
+    x: { ticks: { color: TEXT_MUTED, font:{size:10} }, grid: { color: 'rgba(42,58,80,0.5)' } },
+    y: { ticks: { color: TEXT_MUTED, font:{size:10} }, grid: { color: 'rgba(42,58,80,0.5)' } }
+  }
+};
+
+const chartsInited = {};
+function initChartsForView(id) {
+  if(chartsInited[id]) return;
+  chartsInited[id] = true;
+
+  if(id === 'dashboard') {
+    // Power
+    const ctx = document.getElementById('powerChart');
+    if(ctx) new Chart(ctx, { type:'line', data:{
+      labels: Array.from({length:24},(_,i)=>`${String(i).padStart(2,'0')}:00`),
+      datasets:[
+        {label:'IT Load (MW)', data:[32,31,31,30,30,30,31,33,36,38,39,40,41,40,39,40,41,42,41,39,38,37,36,35], borderColor:TEAL, backgroundColor:'rgba(0,212,200,0.08)', tension:0.4, fill:true, pointRadius:0, borderWidth:2},
+        {label:'Total Facility (MW)', data:[42,41,40,39,39,39,41,44,47,50,51,52,53,52,51,52,53,55,53,51,50,49,47,46], borderColor:AMBER, backgroundColor:'rgba(245,158,11,0.05)', tension:0.4, fill:true, pointRadius:0, borderWidth:2}
+      ]
+    }, options:{...chartDefaults, plugins:{...chartDefaults.plugins}}});
+
+    // Carbon intensity
+    const ctx2 = document.getElementById('carbonChart');
+    if(ctx2) new Chart(ctx2, { type:'bar', data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets:[
+        {label:'Carbon Intensity (gCO₂/kWh)', data:[120,112,98,88,74,68,55,60,67,72,80,75], backgroundColor:TEAL+'80', borderColor:TEAL, borderWidth:1, borderRadius:4}
+      ]
+    }, options:{...chartDefaults}});
+  }
+
+  if(id === 'compliance') {
+    // Emissions
+    const ctx = document.getElementById('emissionsChart');
+    if(ctx) new Chart(ctx, { type:'bar', data:{
+      labels:['2022','2023','2024','2025F','2026F','2027F'],
+      datasets:[
+        {label:'Scope 1', data:[420,310,210,160,120,90], backgroundColor:GREEN+'90', borderRadius:4},
+        {label:'Scope 2', data:[3200,2400,1840,1400,1000,700], backgroundColor:TEAL+'90', borderRadius:4},
+        {label:'Scope 3', data:[0,0,3200,2800,2400,2000], backgroundColor:PURPLE+'90', borderRadius:4}
+      ]
+    }, options:{...chartDefaults, scales:{...chartDefaults.scales,x:{stacked:false, ticks:{color:TEXT_MUTED,font:{size:10}},grid:{color:'rgba(42,58,80,0.5)'}},y:{stacked:false,ticks:{color:TEXT_MUTED,font:{size:10}},grid:{color:'rgba(42,58,80,0.5)'}}}}});
+
+    // Renewable
+    const ctx2 = document.getElementById('renewableChart');
+    if(ctx2) new Chart(ctx2, { type:'doughnut', data:{
+      labels:['Wind PPA','Solar PPA','Hydro','Biogas','Grid (non-renewable)'],
+      datasets:[{data:[48,22,12,5,13], backgroundColor:[TEAL,GREEN,BLUE,PURPLE,BORDER], borderColor:'transparent', borderWidth:3, hoverOffset:4}]
+    }, options:{plugins:{legend:{position:'bottom',labels:{color:TEXT_MUTED,font:{size:11},boxWidth:10}}}}});
+  }
+
+  if(id === 'risk') {
+    // Risk trend
+    const ctx = document.getElementById('riskChart');
+    if(ctx) new Chart(ctx, { type:'line', data:{
+      labels:['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6','Week 7','Week 8'],
+      datasets:[
+        {label:'Overall Risk Score', data:[45,48,52,55,58,60,62,60], borderColor:AMBER, backgroundColor:'rgba(245,158,11,0.1)', tension:0.4, fill:true, borderWidth:2.5, pointRadius:4, pointBackgroundColor:AMBER},
+        {label:'Community Risk', data:[30,32,40,45,50,55,58,56], borderColor:RED, tension:0.4, fill:false, borderWidth:2, borderDash:[4,4], pointRadius:0},
+        {label:'Regulatory Risk', data:[25,28,28,30,32,32,35,35], borderColor:PURPLE, tension:0.4, fill:false, borderWidth:2, borderDash:[4,4], pointRadius:0}
+      ]
+    }, options:{...chartDefaults}});
+  }
+
+  if(id === 'waste-heat') {
+    const ctx = document.getElementById('heatChart');
+    if(ctx) new Chart(ctx, { type:'bar', data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets:[
+        {label:'Heat Generated (MW)', data:[22,22,22,22,22,22,22,22,22,22,22,22], backgroundColor:RED+'40', borderColor:RED, borderWidth:1, borderRadius:4},
+        {label:'Heat Recovered (MW)', data:[12,13,12,11,10,9,9,10,11,14,15,15], backgroundColor:TEAL+'80', borderColor:TEAL, borderWidth:1, borderRadius:4}
+      ]
+    }, options:{...chartDefaults}});
+  }
+
+  if(id === 'circular') {
+    const ctx = document.getElementById('waterChart');
+    if(ctx) new Chart(ctx, { type:'line', data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets:[
+        {label:'Total Water Used (m³)', data:[8200,7800,7600,7400,7000,6800,7200,7400,7000,6800,6600,6500], borderColor:BLUE, tension:0.4, fill:false, borderWidth:2, pointRadius:0},
+        {label:'Water Reused (m³)', data:[3200,3400,3800,4000,4200,4400,4200,4000,4200,4400,4600,4800], borderColor:TEAL, backgroundColor:'rgba(0,212,200,0.08)', tension:0.4, fill:true, borderWidth:2, pointRadius:0}
+      ]
+    }, options:{...chartDefaults}});
+
+    const ctx2 = document.getElementById('materialsChart');
+    if(ctx2) new Chart(ctx2, { type:'doughnut', data:{
+      labels:['Batteries Recycled','UPS Reused','Servers Refurb','E-waste Diverted','Refrigerant Recov.'],
+      datasets:[{data:[35,25,22,12,6], backgroundColor:[GREEN,TEAL,BLUE,AMBER,PURPLE], borderColor:'transparent', borderWidth:3}]
+    }, options:{plugins:{legend:{position:'right',labels:{color:TEXT_MUTED,font:{size:10},boxWidth:8}}}}});
+  }
+
+  if(id === 'economic') {
+    const ctx = document.getElementById('econChart');
+    if(ctx) new Chart(ctx, { type:'doughnut', data:{
+      labels:['Local Suppliers (€11.5M)','Hotel Spend (€1.8M)','Tax (€3.2M)','Restaurants (€620K)','Transport (€340K)'],
+      datasets:[{data:[64,10,18,4,2], backgroundColor:[TEAL,BLUE,GREEN,AMBER,PURPLE], borderColor:'transparent', borderWidth:3, hoverOffset:6}]
+    }, options:{plugins:{legend:{position:'bottom',labels:{color:TEXT_MUTED,font:{size:11},boxWidth:10}}}}});
+
+    const ctx2 = document.getElementById('employmentChart');
+    if(ctx2) new Chart(ctx2, { type:'bar', data:{
+      labels:['2021','2022','2023','2024','2025F','2026F'],
+      datasets:[
+        {label:'Direct Jobs', data:[42,68,94,136,160,180], backgroundColor:TEAL+'90', borderRadius:4},
+        {label:'Indirect Jobs', data:[28,52,76,104,120,140], backgroundColor:BLUE+'80', borderRadius:4}
+      ]
+    }, options:{...chartDefaults, scales:{...chartDefaults.scales, x:{stacked:true, ticks:{color:TEXT_MUTED,font:{size:10}},grid:{color:'rgba(42,58,80,0.5)'}}, y:{stacked:true, ticks:{color:TEXT_MUTED,font:{size:10}},grid:{color:'rgba(42,58,80,0.5)'}}}}});
+  }
+
+  if(id === 'public') {
+    const ctx = document.getElementById('publicEmissionsChart');
+    if(ctx) new Chart(ctx, { type:'line', data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets:[
+        {label:'Total Emissions (tCO₂e/mo)', data:[440,420,395,380,360,340,330,335,340,355,370,360], borderColor:AMBER, backgroundColor:'rgba(245,158,11,0.08)', tension:0.4, fill:true, borderWidth:2, pointRadius:0},
+        {label:'Carbon Avoided (tCO₂e/mo)', data:[800,820,900,950,1050,1100,1120,1100,1080,1020,980,960], borderColor:GREEN, tension:0.4, fill:false, borderWidth:2, pointRadius:0}
+      ]
+    }, options:{...chartDefaults}});
+  }
+
+  if(id === 'municipal') {
+    const ctx = document.getElementById('municipalChart');
+    if(ctx) new Chart(ctx, { type:'radar', data:{
+      labels:['Noise','Air Quality','Water','Thermal','Generator','Planning','Traffic'],
+      datasets:[
+        {label:'Compliance Score', data:[96,82,90,88,95,100,78], borderColor:TEAL, backgroundColor:'rgba(0,212,200,0.1)', borderWidth:2, pointBackgroundColor:TEAL, pointRadius:4},
+        {label:'Target (100)', data:[100,100,100,100,100,100,100], borderColor:BORDER, backgroundColor:'transparent', borderWidth:1, borderDash:[4,4], pointRadius:0}
+      ]
+    }, options:{plugins:{legend:{labels:{color:TEXT_MUTED,font:{size:11},boxWidth:10}}}, scales:{r:{ticks:{color:TEXT_MUTED,font:{size:9},backdropColor:'transparent'},grid:{color:'rgba(42,58,80,0.6)'},pointLabels:{color:TEXT_MUTED,font:{size:11}}}}}});
+  }
+
+  if(id === 'investor') {
+    const ctx = document.getElementById('investorEnvChart');
+    if(ctx) new Chart(ctx, { type:'bar', data:{
+      labels:['Scope 1','Scope 2','Scope 3','Carbon Avoided','Heat Recovery','Renewable %'],
+      datasets:[
+        {label:'2023', data:[310,2400,0,8200,62,78], backgroundColor:BORDER, borderRadius:4},
+        {label:'2024', data:[210,1840,3200,12400,70300/1000,87], backgroundColor:TEAL+'90', borderRadius:4}
+      ]
+    }, options:{...chartDefaults}});
+
+    const ctx2 = document.getElementById('esgTrendChart');
+    if(ctx2) new Chart(ctx2, { type:'line', data:{
+      labels:['Q1 22','Q2 22','Q3 22','Q4 22','Q1 23','Q2 23','Q3 23','Q4 23','Q1 24','Q2 24','Q3 24','Q4 24'],
+      datasets:[
+        {label:'Overall ESG', data:[62,64,66,68,68,70,72,74,74,76,77,78], borderColor:TEAL, tension:0.4, fill:false, borderWidth:2.5, pointRadius:0},
+        {label:'Environmental', data:[60,63,66,70,71,74,76,78,80,82,84,85], borderColor:GREEN, tension:0.4, fill:false, borderWidth:2, borderDash:[4,4], pointRadius:0},
+        {label:'Social', data:[65,66,66,67,67,68,69,70,70,71,72,73], borderColor:BLUE, tension:0.4, fill:false, borderWidth:2, borderDash:[4,4], pointRadius:0}
+      ]
+    }, options:{...chartDefaults}});
+  }
+}
+
+// Init dashboard on load
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => initChartsForView('dashboard'), 100);
+});
+
+// ═══════════════════════════════════════════
+// GRIEVANCE CHAT
+// ═══════════════════════════════════════════
+function fillChat(text) {
+  document.getElementById('chatInput').value = text;
+  document.getElementById('chatInput').focus();
+}
+
+function handleChatKey(e) {
+  if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendGrievance(); }
+}
+
+const grievanceResponses = {
+  noise: {
+    check: t => /noise|loud|generator|sound|bang|rumble|vibrat/i.test(t),
+    getResponse: () => `<div style="margin-bottom:8px"><strong>🔍 AI Investigation — Noise Complaint</strong></div>
+<div class="ai-status-card">
+  <div class="ai-status-row"><span class="ai-status-key">📡 Noise sensor (perimeter E)</span><span class="ai-status-val">46.2 dB</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">⏱ Timestamp reviewed</span><span class="ai-status-val">22:38–22:58</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">⚙ Generator C-3 log</span><span class="ai-status-val">RUNNING — Test cycle</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🌬 Wind direction</span><span class="ai-status-val">SW → Beechwood Ave</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">📋 Permit limit</span><span class="ai-status-val">45 dB (night)</span></div>
+</div>
+<div class="verdict-banner valid">⚠ VALID COMPLAINT — Permit limit exceeded by 1.2 dB during generator test</div>
+<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">
+An escalation ticket has been raised. Our operations team will investigate the noise attenuation of Generator C-3 by 09:00 tomorrow. We sincerely apologise for the disturbance. A written response will be sent to you within 24 hours.
+</div>`
+  },
+  traffic: {
+    check: t => /traffic|lorr|truck|congest|road|block|delivery|morning/i.test(t),
+    getResponse: () => `<div style="margin-bottom:8px"><strong>🔍 AI Investigation — Traffic Report</strong></div>
+<div class="ai-status-card">
+  <div class="ai-status-row"><span class="ai-status-key">📋 Delivery schedule reviewed</span><span class="ai-status-val">07:00–09:00 window</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🚛 Active contractors on site</span><span class="ai-status-val">3 active (Hall B fit-out)</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">📍 Road affected</span><span class="ai-status-val">Malahide Rd northbound</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">📣 Council notification</span><span class="ai-status-val">Nov 2024 — Traffic Management Plan</span></div>
+</div>
+<div class="verdict-banner investigating">🔎 VALID CONCERN — Contractor scheduling to be reviewed</div>
+<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">
+Construction deliveries are authorised under our Traffic Management Plan. However, we will review whether the 07:00 start time is appropriate and aim to push deliveries to 08:30+ to reduce impact on the morning commute. We'll update you by end of week.
+</div>`
+  },
+  water: {
+    check: t => /water|odour|smell|chemical|tank|pipe|leak|supply/i.test(t),
+    getResponse: () => `<div style="margin-bottom:8px"><strong>🔍 AI Investigation — Water / Odour</strong></div>
+<div class="ai-status-card">
+  <div class="ai-status-row"><span class="ai-status-key">💧 Discharge logs (last 24h)</span><span class="ai-status-val">Normal — no anomalies</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🧪 Cooling tower chemistry</span><span class="ai-status-val">pH 7.8 — Within spec</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🌬 Wind at perimeter</span><span class="ai-status-val">SW 12 km/h</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🗺 Nearby sewage works</span><span class="ai-status-val">Clonshaugh — 400m NW</span></div>
+</div>
+<div class="verdict-banner false-alarm">✅ LIKELY EXTERNAL SOURCE — No facility discharge detected</div>
+<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">
+Our telemetry shows all water systems operating within normal parameters and no chemical releases. The odour is likely from the Clonshaugh wastewater facility upwind. We have logged this and will conduct a perimeter inspection today as a precaution.
+</div>`
+  },
+  steam: {
+    check: t => /steam|cloud|smoke|cooling tower|vapour|mist|plume|air/i.test(t),
+    getResponse: () => `<div style="margin-bottom:8px"><strong>🔍 AI Investigation — Visible Emission (Steam)</strong></div>
+<div class="ai-status-card">
+  <div class="ai-status-row"><span class="ai-status-key">🌡 Cooling tower operation</span><span class="ai-status-val">Normal — 18°C delta T</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">☁ Relative humidity</span><span class="ai-status-val">82% (high — plume visible)</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🧪 Air quality PM2.5</span><span class="ai-status-val">8 µg/m³ — WHO compliant</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">🔬 Chemical content</span><span class="ai-status-val">Water vapour only</span></div>
+</div>
+<div class="verdict-banner false-alarm">✅ FALSE ALARM — Water vapour only, no harmful emissions</div>
+<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">
+The visible cloud is pure water vapour from our cooling towers — identical to the steam you'd see from a kettle. On humid days it can travel further. There are absolutely no chemical or harmful emissions. Our real-time air quality monitors confirm everything is within safe limits.
+</div>`
+  },
+  default: {
+    check: () => true,
+    getResponse: (msg) => `<div style="margin-bottom:8px"><strong>💬 CommunityGPT Response</strong></div>
+<div style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:10px">
+Thank you for reaching out about <em>"${msg.substring(0,60)}${msg.length>60?'...':''}"</em>.<br><br>
+I've logged your inquiry and cross-checked our live telemetry. A member of our community liaison team will follow up with you within 2 business hours. Your reference number is <strong class="font-mono text-teal">#DC-${Math.floor(Math.random()*90000+10000)}</strong>.
+</div>
+<div class="ai-status-card">
+  <div class="ai-status-row"><span class="ai-status-key">📋 Status</span><span class="ai-status-val">Logged &amp; Assigned</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">👤 Assigned to</span><span class="ai-status-val">Community Liaison Team</span></div>
+  <div class="ai-status-row"><span class="ai-status-key">⏱ Expected response</span><span class="ai-status-val">Within 2 hours</span></div>
+</div>`
+  }
+};
+
+// Backend URL for live Google-Drive-backed answers.
+// Point this at your deployed server.js (see backend/README.md).
+// If unreachable, the widget falls back to the scripted demo replies below.
+const OPERATORGPT_BACKEND_URL = 'http://localhost:8787/api/chat';
+
+async function sendGrievance() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+
+  const msgs = document.getElementById('chatMessages');
+  const now = new Date().toLocaleTimeString('en-IE',{hour:'2-digit',minute:'2-digit'});
+
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg user';
+  userMsg.innerHTML = `<div class="msg-avatar">👤</div><div><div class="msg-bubble">${escHtml(text)}</div><div class="msg-time">${now}</div></div>`;
+  msgs.appendChild(userMsg);
+
+  const typingEl = document.createElement('div');
+  typingEl.className = 'msg ai';
+  typingEl.innerHTML = `<div class="msg-avatar">🤖</div><div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
+  msgs.appendChild(typingEl);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  document.getElementById('sendBtn').disabled = true;
+
+  let html;
+  try {
+    const resp = await fetch(OPERATORGPT_BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    });
+    if (!resp.ok) throw new Error('backend not ok');
+    const data = await resp.json();
+    html = `<div style="margin-bottom:8px"><strong>🔍 OperatorGPT (Google Drive)</strong></div>
+<div style="font-size:13px;color:var(--text-muted);line-height:1.6">${escHtml(data.answer || '').replace(/\n/g,'<br>')}</div>
+<div style="margin-top:8px;font-size:10px;color:var(--text-dim)">Source: ${escHtml(data.sources || 'Datenfarmen Drive')}</div>`;
+  } catch (e) {
+    let responder = grievanceResponses.default;
+    for(const [key, r] of Object.entries(grievanceResponses)) {
+      if(key !== 'default' && r.check(text)) { responder = r; break; }
+    }
+    await new Promise(r => setTimeout(r, 1200 + Math.random() * 800));
+    html = responder.getResponse(text);
+  }
+
+  typingEl.remove();
+  const aiMsg = document.createElement('div');
+  aiMsg.className = 'msg ai';
+  aiMsg.innerHTML = `<div class="msg-avatar">🤖</div><div><div class="msg-bubble">${html}</div><div class="msg-time">CommunityGPT · ${now}</div></div>`;
+  msgs.appendChild(aiMsg);
+  msgs.scrollTop = msgs.scrollHeight;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ═══════════════════════════════════════════
+// AI REPORT GENERATOR
+// ═══════════════════════════════════════════
+async function generateReport() {
+  const btn = document.getElementById('generateReportBtn');
+  const outputArea = document.getElementById('reportOutputArea');
+  const output = document.getElementById('reportOutput');
+  const type = document.getElementById('reportType').value;
+  const period = document.getElementById('reportPeriod').value;
+
+  btn.textContent = '⏳ Generating…';
+  btn.disabled = true;
+  outputArea.style.display = 'block';
+  output.innerHTML = '<div class="typing-indicator" style="padding:8px 0"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+
+  const prompt = `You are CommunityGPT, an AI assistant for the DublinDC-01 data centre. 
+Generate a concise, professional ${type} for ${period}. 
+
+Key data to incorporate:
+- Facility: DublinDC-01, Dublin, Ireland. 48 MW IT load.
+- PUE: 1.28. Renewable energy: 87%. WUE: 0.43 L/kWh.
+- Scope 1: 210 tCO₂e/yr (↓8%). Scope 2: 1,840 tCO₂e/yr (↓22%). Scope 3: 3,200 tCO₂e (baseline).
+- Waste heat recovery: 14.8 MW supplied to community — 4,250 homes, hospital, schools, greenhouses.
+- CO₂ avoided: 3,800 tCO₂e/yr. Natural gas avoided: 1.9M m³/yr.
+- Local jobs: 240 FTE. Local supplier spend: €11.5M. Tax contribution: €3.2M.
+- Open grievances: 5. Resolution rate: 94%. Avg resolution: 4.2 hours.
+- ESG rating: A–. Compliance score: 92/100.
+- Permit note: Air quality permit AQ-2024-IR09 renewal overdue — flagged.
+- Community investment: €2.7M including district heating, STEM education, urban greening.
+
+Write in a professional, factual tone with key highlights, KPI table, and 3–4 strategic recommendations. Use markdown formatting with headers. Keep to ~400 words.`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.map(b => b.text || '').join('') || 'Report generation failed.';
+    output.innerHTML = markdownToHtml(text);
+  } catch(e) {
+    output.innerHTML = `<div style="color:var(--red)">⚠ Report generation failed. Please check your connection and try again.</div>`;
+  }
+
+  btn.textContent = '🤖 Generate New Report';
+  btn.disabled = false;
+  outputArea.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function markdownToHtml(md) {
+  return md
+    .replace(/^## (.+)$/gm, '<div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text);margin:14px 0 6px">$1</div>')
+    .replace(/^### (.+)$/gm, '<div style="font-size:13px;font-weight:700;color:var(--teal);margin:10px 0 4px">$1</div>')
+    .replace(/^# (.+)$/gm, '<div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin:0 0 10px">$1</div>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text)">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em style="color:var(--text-muted)">$1</em>')
+    .replace(/^- (.+)$/gm, '<div style="display:flex;gap:6px;padding:2px 0"><span style="color:var(--teal)">·</span><span>$1</span></div>')
+    .replace(/\n\n/g, '<br>')
+    .replace(/\n/g, '');
+}
+</script>
+</body>
+</html>

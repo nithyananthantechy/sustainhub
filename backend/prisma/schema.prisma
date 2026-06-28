@@ -59,10 +59,13 @@ model Company {
   createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamp()
   updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamp()
 
-  users            User[]
-  csrMetrics       CsrMetric[]
-  operationalStats OperationalStat[]
-  tickets          Ticket[]
+  users                User[]
+  csrMetrics           CsrMetric[]
+  operationalStats     OperationalStat[]
+  tickets              Ticket[]
+  riskAssessments      RiskAssessment[]
+  circularEconomyStats CircularEconomyStat[]
+  economicImpacts      EconomicImpact[]
 
   @@map("companies")
 }
@@ -120,9 +123,11 @@ model Ticket {
   description String         @db.Text
   category    TicketCategory
   status      TicketStatus   @default(open)
-  priority    TicketPriority @default(medium)
-  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamp()
-  resolvedAt  DateTime?      @map("resolved_at") @db.Timestamp()
+  priority       TicketPriority @default(medium)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamp()
+  resolvedAt     DateTime?      @map("resolved_at") @db.Timestamp()
+  aiResolved     Boolean        @default(false) @map("ai_resolved")
+  chatTranscript Json?          @map("chat_transcript")
 
   company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -142,4 +147,46 @@ model TicketResponse {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("ticket_responses")
+}
+
+model RiskAssessment {
+  id                String   @id @default(uuid()) @db.Uuid
+  companyId         String   @map("company_id") @db.Uuid
+  riskScore         Int
+  riskLevel         String   @db.VarChar(50)
+  topRiskFactors    Json     @map("top_risk_factors")
+  aiRecommendations Json     @map("ai_recommendations")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamp()
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("risk_assessments")
+}
+
+model CircularEconomyStat {
+  id         String   @id @default(uuid()) @db.Uuid
+  companyId  String   @map("company_id") @db.Uuid
+  category   String   @db.VarChar(100)
+  metricName String   @map("metric_name") @db.VarChar(255)
+  value      Decimal  @db.Decimal(15, 2)
+  unit       String   @db.VarChar(50)
+  recordedAt DateTime @default(now()) @map("recorded_at") @db.Timestamp()
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("circular_economy_stats")
+}
+
+model EconomicImpact {
+  id              String   @id @default(uuid()) @db.Uuid
+  companyId       String   @map("company_id") @db.Uuid
+  localJobs       Int      @map("local_jobs")
+  localSpend      Decimal  @map("local_spend") @db.Decimal(15, 2)
+  taxContribution Decimal  @map("tax_contribution") @db.Decimal(15, 2)
+  apprenticeships Int
+  recordedAt      DateTime @default(now()) @map("recorded_at") @db.Timestamp()
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("economic_impacts")
 }

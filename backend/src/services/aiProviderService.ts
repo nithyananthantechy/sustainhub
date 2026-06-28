@@ -64,25 +64,42 @@ class AIProviderService {
     }
   }
 
-  private async callActiveProvider(prompt: string): Promise<string> {
+  async generateTicketAutoReply(ticketContent: string, complianceContext: string): Promise<string> {
+    const prompt = `You are an AI assistant for a data center / community hub. A community member has submitted a grievance ticket.
+Ticket details: "${ticketContent}"
+Compliance context: "${complianceContext}"
+Please provide a polite, professional auto-reply acknowledging the issue, referencing the compliance context if relevant, and assuring them it is being looked into. Keep it under 3 sentences. Output only the message text, no JSON.`;
+
+    try {
+      if (this.activeProvider.name === 'mock') {
+        return `Thank you for reaching out. We have received your ticket regarding: "${ticketContent.substring(0, 50)}...". Our team is investigating this issue and will get back to you shortly.`;
+      }
+      return await this.callActiveProvider(prompt, false);
+    } catch (error) {
+      console.error(`[AI Provider] Auto-reply failed, trying fallback...`, error);
+      return await this.callFallbackProvider(prompt, false);
+    }
+  }
+
+  private async callActiveProvider(prompt: string, expectJson: boolean = true): Promise<string> {
     switch (this.activeProvider.name) {
       case 'groq':
-        return await this.callGroq(prompt);
+        return await this.callGroq(prompt, expectJson);
       case 'gemini':
-        return await this.callGemini(prompt);
+        return await this.callGemini(prompt, expectJson);
       case 'nvidia':
-        return await this.callNvidia(prompt);
+        return await this.callNvidia(prompt, expectJson);
       default:
         throw new Error('Unknown provider');
     }
   }
 
-  private async callFallbackProvider(prompt: string): Promise<string> {
+  private async callFallbackProvider(prompt: string, expectJson: boolean = true): Promise<string> {
     // Try Gemini
     if (this.geminiProvider?.enabled && this.activeProvider.name !== 'gemini') {
       try {
         console.log('[AI Provider] Switching to fallback Gemini...');
-        return await this.callGemini(prompt);
+        return await this.callGemini(prompt, expectJson);
       } catch (e) {
         console.error('[AI Provider] Fallback Gemini failed:', e);
       }
@@ -92,7 +109,7 @@ class AIProviderService {
     if (this.nvidiaProvider?.enabled && this.activeProvider.name !== 'nvidia') {
       try {
         console.log('[AI Provider] Switching to fallback Nvidia...');
-        return await this.callNvidia(prompt);
+        return await this.callNvidia(prompt, expectJson);
       } catch (e) {
         console.error('[AI Provider] Fallback Nvidia failed:', e);
       }
@@ -100,10 +117,10 @@ class AIProviderService {
 
     // If everything fails, return mock data to prevent hard crash
     console.warn('[AI Provider] All real AI providers failed or are unconfigured. Falling back to mock analysis.');
-    return this.getMockResponse(prompt);
+    return expectJson ? this.getMockResponse(prompt) : "We're currently experiencing high volumes. Your ticket has been logged and we will respond soon.";
   }
 
-  private async callGroq(prompt: string): Promise<string> {
+  private async callGroq(prompt: string, expectJson: boolean = true): Promise<string> {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -115,7 +132,7 @@ class AIProviderService {
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3,
         max_tokens: 600,
-        response_format: { type: 'json_object' }, // Enforce JSON response if supported
+        ...(expectJson ? { response_format: { type: 'json_object' } } : {}),
       }),
     });
 
@@ -127,7 +144,8 @@ class AIProviderService {
     return data.choices[0].message.content;
   }
 
-  private async callGemini(prompt: string): Promise<string> {
+  private async callGemini(prompt: string, expectJson: boolean = true): Promise<string> {
+    const fullPrompt = expectJson ? prompt + '\nIMPORTANT: Your output MUST be raw JSON only.' : prompt;
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.geminiProvider?.apiKey}`,
       {
@@ -136,12 +154,14 @@ class AIProviderService {
         body: JSON.stringify({
           contents: [
             {
-              parts: [{ text: prompt + '\nIMPORTANT: Your output MUST be raw JSON only.' }],
+              parts: [{ text: fullPrompt }],
             },
           ],
-          generationConfig: {
-            responseMimeType: 'application/json', // Enforce JSON response format
-          }
+          ...(expectJson ? {
+            generationConfig: {
+              responseMimeType: 'application/json',
+            }
+          } : {})
         }),
       }
     );
@@ -154,7 +174,7 @@ class AIProviderService {
     return data.candidates[0].content.parts[0].text;
   }
 
-  private async callNvidia(prompt: string): Promise<string> {
+  private async callNvidia(prompt: string, expectJson: boolean = true): Promise<string> {
     const response = await fetch('https://api.nvidia.com/v1/chat/completions', {
       method: 'POST',
       headers: {

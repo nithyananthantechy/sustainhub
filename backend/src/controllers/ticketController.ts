@@ -3,6 +3,7 @@ import prisma from '../config/db';
 import { AuthenticatedRequest } from '../types/auth';
 import { socketService } from '../services/socketService';
 import { TicketCategory, TicketPriority, TicketStatus } from '@prisma/client';
+import { aiProviderService } from '../services/aiProviderService';
 
 // GET /api/tickets/:company_id
 export async function getCompanyTickets(req: AuthenticatedRequest, res: Response) {
@@ -68,6 +69,46 @@ export async function createTicket(req: AuthenticatedRequest, res: Response) {
 
     // Broadcast new ticket to company admin/manager sockets
     socketService.emitToCompany(finalCompanyId, 'ticket:created', ticket);
+
+    // --- AI Auto-Responder Logic ---
+    // Fetch some basic compliance metrics as context for the AI
+    const metrics = await prisma.csrMetric.findMany({
+      where: { companyId: finalCompanyId },
+      take: 5
+    });
+    const complianceContext = metrics.map(m => `${m.metricName}: ${m.metricValue}${m.metricUnit}`).join(', ');
+
+    // Generate AI response asynchronously (so we don't block the API return)
+    aiProviderService.generateTicketAutoReply(description, complianceContext)
+      .then(async (replyText) => {
+        // Look up the default AI/System user (or fallback to null for system messages)
+        // For simplicity, we just create the response with no userId (if schema allows)
+        // Or we create a dummy 'AI Assistant' user? The schema requires userId, so we'll just use the ticket owner for now if no admin exists,
+        // Wait, TicketResponse usually requires a user. Let's find an admin user in that company.
+        const adminUser = await prisma.user.findFirst({
+          where: { companyId: finalCompanyId, role: 'admin' }
+        });
+
+        if (adminUser) {
+          const aiResponse = await prisma.ticketResponse.create({
+            data: {
+              ticketId: ticket.id,
+              userId: adminUser.id, // Using admin as proxy for AI
+              responseText: `[AI Auto-Reply] ${replyText}`,
+            },
+            include: {
+              user: { select: { id: true, name: true, role: true } },
+            },
+          });
+          
+          socketService.emitToCompany(finalCompanyId, 'ticket:response_added', {
+            ticketId: ticket.id,
+            response: aiResponse,
+          });
+        }
+      })
+      .catch((err) => console.error('[AI Auto-Reply Error]:', err));
+    // -------------------------------
 
     return res.status(201).json({
       message: 'Ticket created successfully',

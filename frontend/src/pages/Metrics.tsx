@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth, api } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import MetricsCard, { Metric } from '../components/MetricsCard';
-import { Plus, Leaf, HelpCircle, X, Trash2, Edit3, Save, AlertCircle } from 'lucide-react';
+import { Plus, Leaf, HelpCircle, X, Trash2, Edit3, Save, AlertCircle, RefreshCw } from 'lucide-react';
 
 const Metrics: React.FC = () => {
   const { company } = useAuth();
@@ -21,6 +21,7 @@ const Metrics: React.FC = () => {
   const [category, setCategory] = useState<'environmental' | 'social' | 'economic'>('environmental');
   const [description, setDescription] = useState('');
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
 
   const fetchMetrics = useCallback(async () => {
     if (!company) return;
@@ -87,6 +88,19 @@ const Metrics: React.FC = () => {
     }
   };
 
+  const handleSharepointSync = async () => {
+    setSyncLoading(true);
+    setError(null);
+    try {
+      await api.post('/csr-metrics/sync');
+      // The socket event 'metrics:synced' will trigger fetchMetrics automatically
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to sync with SharePoint.');
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
   // Trigger Edit Mode
   const startEdit = (metric: Metric) => {
     setEditingMetric(metric);
@@ -142,16 +156,27 @@ const Metrics: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            resetForm();
-            setShowCreateModal(true);
-          }}
-          className="flex items-center px-4 py-2.5 bg-brand-700 hover:bg-brand-850 text-white font-bold text-xs rounded-xl shadow-md transition-all duration-200 shrink-0"
-        >
-          <Plus className="w-4 h-4 mr-1.5" />
-          Add CSR Metric
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleSharepointSync}
+            disabled={syncLoading}
+            className="flex items-center px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl shadow-sm transition-all duration-200 shrink-0 disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 mr-1.5 ${syncLoading ? 'animate-spin' : ''}`} />
+            {syncLoading ? 'Syncing...' : 'Sync with SharePoint'}
+          </button>
+          
+          <button
+            onClick={() => {
+              resetForm();
+              setShowCreateModal(true);
+            }}
+            className="flex items-center px-4 py-2.5 bg-brand-700 hover:bg-brand-850 text-white font-bold text-xs rounded-xl shadow-md transition-all duration-200 shrink-0"
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Add CSR Metric
+          </button>
+        </div>
       </div>
 
       {/* Metrics Grid list */}

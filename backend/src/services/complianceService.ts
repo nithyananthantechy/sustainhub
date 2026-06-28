@@ -44,6 +44,14 @@ class ComplianceService {
       type: 'environmental',
       higherIsBetter: false,
     },
+    ISO_27001: {
+      name: 'ISO 27001 & Data Center Green Code',
+      metric: 'carbon_emissions',
+      target: 150, // Stricter carbon limit for data centers
+      unit: 'tCO2e',
+      type: 'environmental',
+      higherIsBetter: false,
+    },
     GERMAN_STROMSTG: {
       name: 'German StromStG (Electricity Tax)',
       metric: 'renewable_energy_percentage',
@@ -226,7 +234,8 @@ class ComplianceService {
         if (nameLower.includes('carbon') && nameLower.includes('offset')) {
           standardKey = 'EU_ENERGY_EFFICIENCY'; // offset score target
         } else if (nameLower.includes('carbon') || nameLower.includes('footprint') || nameLower.includes('emission')) {
-          standardKey = 'EU_CARBON_2050';
+          // Default to ISO 27001 Data Center limit or EU Carbon 2050
+          standardKey = 'ISO_27001';
         } else if (nameLower.includes('energy') && nameLower.includes('efficiency')) {
           standardKey = 'EU_ENERGY_EFFICIENCY';
         } else if (nameLower.includes('renewable') || nameLower.includes('solar') || nameLower.includes('wind')) {

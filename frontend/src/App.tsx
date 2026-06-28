@@ -13,8 +13,16 @@ import TicketDetail from './pages/TicketDetail';
 import Settings from './pages/Settings';
 import Metrics from './pages/Metrics';
 import Widget from './pages/Widget';
-import ComplianceDashboard from './pages/ComplianceDashboard';
+import ComplianceESG from './pages/ComplianceESG';
+import WasteHeatRecovery from './pages/WasteHeatRecovery';
+import MunicipalView from './pages/MunicipalView';
+import InvestorDashboard from './pages/InvestorDashboard';
+import Reports from './pages/Reports';
+import RiskEngine from './pages/RiskEngine';
+import CircularEconomy from './pages/CircularEconomy';
+import EconomicImpact from './pages/EconomicImpact';
 import DemoStore from './pages/DemoStore';
+import PublicPortal from './pages/PublicPortal';
 
 // Route protection wrapper
 const ProtectedRoute = () => {
@@ -57,6 +65,9 @@ const App: React.FC = () => {
             {/* Public Auth Routes */}
             <Route path="/login" element={<Login />} />
             
+            {/* Public Transparency Portal */}
+            <Route path="/portal" element={<PublicPortal />} />
+            
             {/* Embeddable Iframe Widget (No Navbar, Anonymous accessibility) */}
             <Route path="/widget" element={<Widget />} />
             
@@ -68,7 +79,14 @@ const App: React.FC = () => {
               <Route element={<DashboardLayout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/metrics" element={<Metrics />} />
-                <Route path="/compliance" element={<ComplianceDashboard />} />
+                <Route path="/compliance" element={<ComplianceESG />} />
+                <Route path="/waste-heat" element={<WasteHeatRecovery />} />
+                <Route path="/municipal" element={<MunicipalView />} />
+                <Route path="/investor" element={<InvestorDashboard />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/risk-engine" element={<RiskEngine />} />
+                <Route path="/circular-economy" element={<CircularEconomy />} />
+                <Route path="/economic-impact" element={<EconomicImpact />} />
                 <Route path="/tickets" element={<Tickets />} />
                 <Route path="/tickets/:id" element={<TicketDetail />} />
                 <Route path="/settings" element={<Settings />} />

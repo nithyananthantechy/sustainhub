@@ -3,7 +3,7 @@ import { useAuth, api } from '../context/AuthContext';
 import { 
   Settings as SettingsIcon, Building, ShieldCheck, Key, 
   Users, Mail, CheckCircle2, Copy, RefreshCw, Plus, 
-  UserPlus, ShieldAlert, Sparkles 
+  UserPlus, ShieldAlert, Sparkles, Code
 } from 'lucide-react';
 
 interface CompanyUser {
@@ -43,6 +43,10 @@ const Settings: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Widget Builder state
+  const [widgetBrand, setWidgetBrand] = useState('indigo');
+  const [widgetCopied, setWidgetCopied] = useState(false);
 
   const isAdmin = user?.role === 'admin';
 
@@ -107,6 +111,15 @@ const Settings: React.FC = () => {
     navigator.clipboard.writeText(apiKey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyWidget = () => {
+    if (!company) return;
+    const widgetUrl = `${window.location.origin}/widget?company_id=${company.id}&brand=${widgetBrand}`;
+    const iframeCode = `<iframe src="${widgetUrl}" width="100%" height="600" frameborder="0" style="border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"></iframe>`;
+    navigator.clipboard.writeText(iframeCode);
+    setWidgetCopied(true);
+    setTimeout(() => setWidgetCopied(false), 2000);
   };
 
   // Rotate API Key
@@ -412,6 +425,56 @@ const Settings: React.FC = () => {
               </button>
             )}
           </div>
+
+          {/* Widget Builder Panel */}
+          {isAdmin && company && (
+            <div className="p-6 bg-white border border-slate-100 rounded-3xl shadow-premium space-y-4">
+              <div className="flex items-center space-x-2 pb-2 border-b border-slate-50">
+                <Code className="w-4 h-4 text-brand-600" />
+                <h3 className="font-outfit font-bold text-slate-800 text-sm">Embeddable Widget Builder</h3>
+              </div>
+
+              <p className="text-[10px] text-slate-400 leading-normal">
+                Generate an iframe snippet to embed the transparency and grievance portal onto your public website.
+              </p>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Brand Color
+                </label>
+                <select
+                  value={widgetBrand}
+                  onChange={(e) => setWidgetBrand(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 outline-none"
+                >
+                  <option value="indigo">Indigo (Default)</option>
+                  <option value="emerald">Emerald</option>
+                  <option value="teal">Teal</option>
+                  <option value="rose">Rose</option>
+                </select>
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  Embed Code
+                </label>
+                <div className="flex flex-col space-y-2">
+                  <textarea
+                    readOnly
+                    className="w-full h-24 p-3 bg-slate-800 text-emerald-400 font-mono text-[10px] rounded-xl outline-none resize-none"
+                    value={`<iframe src="${window.location.origin}/widget?company_id=${company.id}&brand=${widgetBrand}" width="100%" height="600" frameborder="0" style="border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);"></iframe>`}
+                  />
+                  <button
+                    onClick={handleCopyWidget}
+                    className="flex justify-center items-center py-2.5 bg-brand-700 hover:bg-brand-850 text-white font-bold text-xs rounded-xl shadow-md transition-all duration-200"
+                  >
+                    {widgetCopied ? <CheckCircle2 className="w-4 h-4 mr-1.5" /> : <Copy className="w-4 h-4 mr-1.5" />}
+                    {widgetCopied ? 'Copied to Clipboard' : 'Copy Snippet'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* User Invitation Panel */}
           {isAdmin && (
